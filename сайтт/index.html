@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Праводом.рф — юридическая практика. Жилищные и имущественные споры, заливы, ДТП</title>
+  <meta name="description" content="Правовая помощь в жилищных и имущественных спорах: заливы, ДТП, судебные дела, работа с управляющими организациями и должниками. От консультации до суда.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preload" as="image" href="assets/img/hero.jpg">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- ================= ШАПКА ================= -->
+<header class="header" id="top">
+  <div class="container header__inner">
+    <a class="brand" href="index.html" aria-label="Праводом.рф — на главную">
+      <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+        <rect width="64" height="64" rx="14" fill="#082D45"/>
+        <path d="M17 33 L32 19 L47 33" fill="none" stroke="#3E8FCE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 31.5 V45 H42 V31.5" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="28.5" y="37" width="7" height="8" rx="1.5" fill="#3E8FCE"/>
+      </svg>
+      <span>
+        <span class="brand__name">праводом.рф</span>
+        <span class="brand__tag">Юридическая практика</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Основная навигация">
+      <a class="nav__link" href="#uslugi">Услуги</a>
+      <a class="nav__link" href="#instrukcii">Инструкции</a>
+      <a class="nav__link" href="#yurist">О юристе</a>
+    </nav>
+    <div class="header__right">
+      <!-- TODO: заменить телефон-заглушку на реальный номер -->
+      <a class="header__phone" href="tel:+79123456789">
+        <b>+7 912 345-67-89</b>
+        <span>Звоните / WhatsApp / Telegram</span>
+      </a>
+      <button class="btn btn--primary" type="button" data-modal-open>Оставить заявку</button>
+      <button class="nav-toggle" type="button" aria-label="Открыть меню" aria-expanded="false"><span></span></button>
+    </div>
+  </div>
+  <div class="mobile-menu">
+    <a href="#uslugi">Услуги</a>
+    <a href="#instrukcii">Инструкции</a>
+    <a href="#yurist">О юристе</a>
+    <a href="tel:+79123456789">+7 912 345-67-89</a>
+    <button class="btn btn--primary" type="button" data-modal-open>Оставить заявку</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero hero--main">
+    <div class="hero__bg" role="img" aria-label="Современные жилые дома"></div>
+    <div class="container">
+      <div class="hero__inner">
+        <p class="hero__eyebrow">Праводом.рф — юридическая практика</p>
+        <h1 class="hero__title">Правовая помощь в&nbsp;жилищных и&nbsp;имущественных спорах</h1>
+        <p class="hero__sub">Помогаем разобраться в сложных ситуациях, подготовить документы и&nbsp;защитить ваши интересы — от&nbsp;консультации до&nbsp;суда.</p>
+        <div class="hero__actions">
+          <button class="btn btn--primary btn--lg" type="button" data-modal-open>Оставить заявку <span class="arr">→</span></button>
+          <a class="btn btn--ghost btn--lg" href="#uslugi">Посмотреть услуги <span class="arr">→</span></a>
+        </div>
+        <ul class="hero__chips">
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l7 2.6v5.2c0 4.6-3 7.8-7 9.2-4-1.4-7-4.6-7-9.2V6.1z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+            Опыт в жилищных и имущественных спорах
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/></svg>
+            Индивидуальный подход
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5V8h4"/><path d="M10 12.5h5M10 16h5"/></svg>
+            Честная оценка перспектив
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= УСЛУГИ ================= -->
+  <section class="section" id="uslugi">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Направления</p>
+        <h2>Юридическая помощь по&nbsp;разным ситуациям</h2>
+      </div>
+      <div class="cards">
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11.5 12 4.5l8 7"/><path d="M6.5 10.5v9h11v-9"/><path d="M10.5 19.5v-4.5h3v4.5"/></svg>
+          </div>
+          <h3 class="card__title">Жилищные споры</h3>
+          <p class="card__text">Споры с УК, ТСЖ, соседями и вопросы содержания общего имущества.</p>
+          <a class="card__link" href="#zayavka" data-modal-open data-modal-source="usluga-zhilishnye-spory">Задать вопрос <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/></svg>
+          </div>
+          <h3 class="card__title">Вас затопили</h3>
+          <p class="card__text">Фиксация ущерба, определение ответственного лица и взыскание расходов.</p>
+          <a class="btn btn--dark btn--sm card__btn" href="#instr-zaliv">Что делать прямо сейчас? <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 15.5 7 11.2A2 2 0 0 1 8.9 9.9h6.2a2 2 0 0 1 1.9 1.3l1.5 4.3"/><rect x="4" y="15.5" width="16" height="3.6" rx="1.3"/><path d="M7 19.1v1.6M17 19.1v1.6"/></svg>
+          </div>
+          <h3 class="card__title">ДТП</h3>
+          <p class="card__text">Взыскание ущерба, споры со страховыми и защита интересов участников ДТП.</p>
+          <a class="btn btn--dark btn--sm card__btn" href="#instr-dtp">Что делать прямо сейчас? <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5V8h4"/><path d="M10 12.5h5M10 16h5"/></svg>
+          </div>
+          <h3 class="card__title">Судебные дела</h3>
+          <p class="card__text">Иски, возражения, представительство и ведение дел в суде.</p>
+          <a class="card__link" href="#zayavka" data-modal-open data-modal-source="usluga-sudebnye-dela">Задать вопрос <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4.5" width="9" height="15.5" rx="1"/><path d="M14 10h4.5a.5.5 0 0 1 .5.5v9.5"/><path d="M8 8.5h2M8 12h2M8 15.5h2M16 13.5h.01M16 16.5h.01"/><path d="M3.5 20h17"/></svg>
+          </div>
+          <h3 class="card__title">Управляющим организациям</h3>
+          <p class="card__text">Претензионная работа, судебные дела и юридическое сопровождение.</p>
+          <a class="card__link" href="dolgi/index.html">Подробнее <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16.8 14.6c2.3.4 3.7 2.1 3.7 4.9"/></svg>
+          </div>
+          <h3 class="card__title">Работа с должниками</h3>
+          <p class="card__text">Судебные приказы, иски и сопровождение дел по взысканию задолженности.</p>
+          <a class="card__link" href="dolgi/index.html">Подробнее <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8" width="17" height="11" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3.5 13h17"/></svg>
+          </div>
+          <h3 class="card__title">Имущественные споры</h3>
+          <p class="card__text">Споры о собственности, разделе имущества и другие имущественные вопросы.</p>
+          <a class="card__link" href="#zayavka" data-modal-open data-modal-source="usluga-imushchestvennye-spory">Задать вопрос <span class="arr">→</span></a>
+        </article>
+
+        <article class="card reveal">
+          <div class="card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l7 2.6v5.2c0 4.6-3 7.8-7 9.2-4-1.4-7-4.6-7-9.2V6.1z"/><path d="M9.2 12l2 2 3.6-3.8"/></svg>
+          </div>
+          <h3 class="card__title">Представительство</h3>
+          <p class="card__text">Защита интересов на досудебном и судебном этапах.</p>
+          <a class="card__link" href="#zayavka" data-modal-open data-modal-source="usluga-predstavitelstvo">Задать вопрос <span class="arr">→</span></a>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЧТО ДЕЛАТЬ ПРЯМО СЕЙЧАС ================= -->
+  <section class="section section--tint" id="instrukcii">
+    <div class="container">
+      <div class="sec-head reveal">
+        <p class="eyebrow">Что делать прямо сейчас</p>
+        <h2>Ситуация требует быстрых решений?</h2>
+      </div>
+      <div class="promo">
+        <article class="promo__card promo__card--flood reveal">
+          <div>
+            <div class="promo__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/></svg>
+            </div>
+            <h3 class="promo__title">Вас затопили?</h3>
+            <p class="promo__text">Что делать в первые минуты, как зафиксировать ущерб и&nbsp;когда обращаться за&nbsp;юридической помощью.</p>
+            <a class="btn btn--ghost" href="#instr-zaliv">Пройти инструкцию <span class="arr">→</span></a>
+          </div>
+        </article>
+        <article class="promo__card promo__card--crash reveal">
+          <div>
+            <div class="promo__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 15.5 7 11.2A2 2 0 0 1 8.9 9.9h6.2a2 2 0 0 1 1.9 1.3l1.5 4.3"/><rect x="4" y="15.5" width="16" height="3.6" rx="1.3"/><path d="M7 19.1v1.6M17 19.1v1.6"/></svg>
+            </div>
+            <h3 class="promo__title">Попали в ДТП?</h3>
+            <p class="promo__text">Что зафиксировать на месте, какие документы сохранить и&nbsp;как защитить свои интересы.</p>
+            <a class="btn btn--ghost" href="#instr-dtp">Пройти инструкцию <span class="arr">→</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ИНСТРУКЦИЯ: ВАС ЗАТОПИЛИ ================= -->
+  <section class="section" id="instr-zaliv">
+    <div class="container">
+      <div class="guide reveal">
+        <div class="guide__head">
+          <p class="eyebrow">Пошаговая инструкция</p>
+          <h2>Вас затопили. Что делать?</h2>
+        </div>
+        <p class="guide__warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v5M12 16h.01"/></svg>
+          Главное — сохранить доказательства и зафиксировать ущерб до&nbsp;устранения последствий.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="step__num">1</div>
+            <h3 class="step__title">Остановите источник воды</h3>
+            <p class="step__text">Перекройте воду, если это безопасно. Сообщите в аварийно-диспетчерскую службу или УК.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">2</div>
+            <h3 class="step__title">Снимите всё на фото и видео</h3>
+            <p class="step__text">Зафиксируйте помещения, потолок, стены, пол, мебель, технику и следы воды.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">3</div>
+            <h3 class="step__title">Оформите акт о заливе</h3>
+            <p class="step__text">Сохраните акт, номер заявки в аварийной службе и переписку.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">4</div>
+            <h3 class="step__title">Не спешите делать ремонт</h3>
+            <p class="step__text">По возможности дождитесь фиксации ущерба и определения объёма восстановительных работ.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">5</div>
+            <h3 class="step__title">Определите размер ущерба</h3>
+            <p class="step__text">Соберите документы и при необходимости организуйте осмотр и расчёт восстановительного ремонта.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">6</div>
+            <h3 class="step__title">Обратитесь к юристу</h3>
+            <p class="step__text">Передайте фотографии, акт и документы — юрист определит дальнейший порядок действий.</p>
+          </div>
+        </div>
+        <div class="guide__cta">
+          <button class="btn btn--primary" type="button" data-modal-open data-modal-source="instrukciya-zaliv">Получить юридическую помощь <span class="arr">→</span></button>
+          <p>Первый шаг — бесплатное уточнение ситуации по вашим документам.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ИНСТРУКЦИЯ: ДТП ================= -->
+  <section class="section section--tint" id="instr-dtp">
+    <div class="container">
+      <div class="guide reveal">
+        <div class="guide__head">
+          <p class="eyebrow">Пошаговая инструкция</p>
+          <h2>Попали в ДТП. Что делать?</h2>
+        </div>
+        <p class="guide__warn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 8v5M12 16h.01"/></svg>
+          Спокойная последовательность действий на месте аварии напрямую влияет на взыскание ущерба.
+        </p>
+        <div class="steps">
+          <div class="step">
+            <div class="step__num">1</div>
+            <h3 class="step__title">Обеспечить безопасность</h3>
+            <p class="step__text">Остановите автомобиль, включите аварийную сигнализацию и выставьте знак аварийной остановки.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">2</div>
+            <h3 class="step__title">Зафиксировать место ДТП</h3>
+            <p class="step__text">Запечатлейте взаимное расположение автомобилей, дорогу, разметку, знаки и светофоры.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">3</div>
+            <h3 class="step__title">Сделать фотографии и видео</h3>
+            <p class="step__text">Снимите повреждения крупным планом и общие планы места аварии с разных ракурсов.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">4</div>
+            <h3 class="step__title">Собрать сведения участников и свидетелей</h3>
+            <p class="step__text">Запишите данные водителей, номера полисов ОСАГО и контакты свидетелей.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">5</div>
+            <h3 class="step__title">Сохранить документы</h3>
+            <p class="step__text">Держите под рукой извещение о ДТП, документы страховой и всю переписку с ней.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">6</div>
+            <h3 class="step__title">Не выбрасывать детали и документы</h3>
+            <p class="step__text">Повреждённые детали и документы по ремонту могут понадобиться для оценки ущерба и в суде.</p>
+          </div>
+          <div class="step">
+            <div class="step__num">7</div>
+            <h3 class="step__title">При необходимости обратиться к юристу</h3>
+            <p class="step__text">Юрист поможет в споре со страховой или виновником и во взыскании ущерба.</p>
+          </div>
+        </div>
+        <div class="guide__cta">
+          <button class="btn btn--primary" type="button" data-modal-open data-modal-source="instrukciya-dtp">Получить юридическую помощь <span class="arr">→</span></button>
+          <p>Расскажите о ситуации — подскажем дальнейший порядок действий.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= КАК МЫ РАБОТАЕМ ================= -->
+  <section class="section" id="kak-rabotaem">
+    <div class="container">
+      <div class="work">
+        <div class="work__intro reveal">
+          <p class="eyebrow">Процесс</p>
+          <h2>Как мы работаем</h2>
+          <p class="sec-lead">Вы не остаётесь один на один с вашей проблемой. Всю юридическую работу мы берём на себя.</p>
+        </div>
+        <div class="workrow">
+          <div class="workstep reveal">
+            <div class="workstep__num">1</div>
+            <h3 class="workstep__title">Рассказываете</h3>
+            <p class="workstep__text">Передаёте документы и материалы.</p>
+          </div>
+          <div class="workstep reveal">
+            <div class="workstep__num">2</div>
+            <h3 class="workstep__title">Анализируем</h3>
+            <p class="workstep__text">Изучаем ситуацию и доказательства.</p>
+          </div>
+          <div class="workstep reveal">
+            <div class="workstep__num">3</div>
+            <h3 class="workstep__title">Определяем стратегию</h3>
+            <p class="workstep__text">Объясняем варианты и перспективы.</p>
+          </div>
+          <div class="workstep reveal">
+            <div class="workstep__num">4</div>
+            <h3 class="workstep__title">Готовим документы</h3>
+            <p class="workstep__text">Претензии, иски и другие материалы.</p>
+          </div>
+          <div class="workstep reveal">
+            <div class="workstep__num">5</div>
+            <h3 class="workstep__title">Сопровождаем</h3>
+            <p class="workstep__text">Работаем до согласованного этапа.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= БЛОК ДЛЯ УК (ненавязчиво) ================= -->
+  <section class="section section--blue" id="uk">
+    <div class="container">
+      <div class="ukband reveal">
+        <div class="ukband__grid">
+          <div>
+            <p class="ukband__sub">Для управляющих организаций</p>
+            <h2 class="ukband__title">Работа с должниками</h2>
+            <p class="ukband__text">Подготовка судебных приказов, исковых заявлений и сопровождение судебных дел по задолженности.</p>
+            <ul class="checklist">
+              <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg></span>Получаем документы по должникам</li>
+              <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg></span>Проверяем сведения</li>
+              <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg></span>Готовим судебные материалы</li>
+              <li><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg></span>Сопровождаем дела</li>
+            </ul>
+          </div>
+          <div class="ukband__panel">
+            <h3>Управляющей организации</h3>
+            <p>Отдельная страница с описанием порядка работы, документов и этапов взыскания задолженности.</p>
+            <a class="btn btn--primary" href="dolgi/index.html">Страница для управляющих организаций <span class="arr">→</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ЮРИСТ (личность — ближе к концу) ================= -->
+  <section class="lawyer" id="yurist">
+    <div class="container">
+      <div class="lawyer__grid">
+        <div class="lawyer__photo-wrap reveal">
+          <img class="lawyer__photo" src="assets/dmitry.jpg" alt="Дмитрий Кисельман — ведущий юрист Праводом.рф" loading="lazy" width="460" height="575">
+          <div class="lawyer__badge">Ведущий юрист<small>Праводом.рф</small></div>
+        </div>
+        <div class="reveal">
+          <p class="eyebrow">За практикой</p>
+          <h2 class="lawyer__name">Дмитрий Кисельман</h2>
+          <p class="lawyer__role">Ведущий юрист Праводом.рф</p>
+          <p class="lawyer__text">Основные направления практики — жилищные и имущественные споры, заливы, ДТП, судебные дела и работа с управляющими организациями.</p>
+          <ul class="lawyer__tags">
+            <li>Жилищные споры</li>
+            <li>Заливы</li>
+            <li>ДТП</li>
+            <li>Судебные дела</li>
+            <li>Управляющие организации</li>
+          </ul>
+          <!-- TODO: добавить блоки «Образование», «Регалии», «Опыт», «Специализация» и дополнительные сведения, когда материалы будут готовы -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ФИНАЛЬНЫЙ CTA ================= -->
+  <section class="section section--blue">
+    <div class="container cta-final reveal">
+      <h2>Есть юридический вопрос?</h2>
+      <p class="sec-lead">Оставьте контакты — свяжемся и уточним ситуацию.</p>
+      <button class="btn btn--primary btn--lg" type="button" data-modal-open>Оставить заявку <span class="arr">→</span></button>
+    </div>
+  </section>
+
+</main>
+
+  <!-- ================= ФУТЕР ================= -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div>
+          <a class="brand" href="index.html" aria-label="Праводом.рф — на главную">
+            <svg class="brand__mark" viewBox="0 0 64 64" aria-hidden="true">
+              <rect width="64" height="64" rx="14" fill="#0C3E60"/>
+              <path d="M17 33 L32 19 L47 33" fill="none" stroke="#3E8FCE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M22 31.5 V45 H42 V31.5" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="28.5" y="37" width="7" height="8" rx="1.5" fill="#3E8FCE"/>
+            </svg>
+            <span>
+              <span class="brand__name">праводом.рф</span>
+              <span class="brand__tag">Юридическая практика Дмитрия Кисельмана</span>
+            </span>
+          </a>
+          <p class="footer__desc">Правовая помощь в жилищных и имущественных спорах — от консультации до суда.</p>
+        </div>
+        <div>
+          <h3 class="footer__title">Навигация</h3>
+          <ul class="footer__links">
+            <li><a href="dolgi/index.html"><span class="arr">→</span> Для управляющих организаций</a></li>
+            <li><a href="#uslugi">Услуги</a></li>
+            <li><a href="#instrukcii">Инструкции</a></li>
+            <li><a href="#yurist">О юристе</a></li>
+            <li><a href="privacy.html">Политика конфиденциальности</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="footer__title">Контакты</h3>
+          <!-- TODO: добавить реальные контакты и реквизиты, когда они будут готовы -->
+          <p class="footer__contacts">
+            Телефон: <b>+7 912 345-67-89</b><br>
+            Email: <b>info@праводом.рф</b><br>
+            Реквизиты — будут добавлены позже
+          </p>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© 2026 Праводом.рф — юридическая практика. Все права защищены.</span>
+        <a href="privacy.html">Политика конфиденциальности</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= МОДАЛЬНОЕ ОКНО ЗАЯВКИ (единая форма для всех кнопок) ================= -->
+  <div class="modal" id="zayavka" role="dialog" aria-modal="true" aria-labelledby="zayavka-title" hidden>
+    <div class="modal__card" data-modal-card>
+      <button class="modal__close" type="button" data-modal-close aria-label="Закрыть окно">×</button>
+
+      <div data-form-wrap>
+        <h3 class="modal__title" id="zayavka-title">Оставить заявку</h3>
+        <p class="modal__sub">Оставьте контакты — свяжемся и уточним ситуацию.</p>
+
+        <form class="form" id="lead-form" novalidate>
+          <!-- Антиспам: honeypot. Человек это поле не видит и не заполняет.
+               Если оно заполнено — отправка игнорируется (бот). -->
+          <div class="hp" aria-hidden="true">
+            <label>Сайт (не заполнять)<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
+
+          <div class="field">
+            <label for="f-name">Как к вам обращаться? <span class="req">*</span></label>
+            <input type="text" id="f-name" name="name" placeholder="Имя" autocomplete="name" required>
+            <small class="field__err">Укажите, как к вам обращаться</small>
+          </div>
+
+          <div class="field">
+            <label for="f-phone">Номер телефона <span class="req">*</span></label>
+            <input type="tel" id="f-phone" name="phone" placeholder="+7 (___) ___-__-__" inputmode="tel" autocomplete="tel" required>
+            <small class="field__err">Укажите корректный номер телефона</small>
+          </div>
+
+          <div class="field">
+            <label for="f-email">Email <span style="color:var(--muted);font-weight:500">(необязательно)</span></label>
+            <input type="email" id="f-email" name="email" placeholder="mail@example.com" autocomplete="email">
+            <small class="field__err">Проверьте адрес электронной почты</small>
+          </div>
+
+          <label class="consent">
+            <input type="checkbox" id="f-consent" name="consent" required>
+            <span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg></span>
+            <span class="consent__text">Соглашаюсь на обработку персональных данных в&nbsp;соответствии с&nbsp;<a href="privacy.html" target="_blank" rel="noopener">политикой конфиденциальности</a>.</span>
+          </label>
+
+          <!-- TODO CAPTCHA: место для Cloudflare Turnstile (или другой CAPTCHA)
+               1) подключите скрипт challenges.cloudflare.com/turnstile/v0/api.js
+               2) вставьте <div class="cf-turnstile" data-sitekey="ВАШ_SITEKEY"></div>
+               3) передавайте token на сервер и проверяйте его серверно -->
+
+          <!-- Кнопка изначально НЕактивна: включается только после установки
+               галочки согласия (см. main.js). Без JS кнопка остаётся неактивной. -->
+          <button class="btn btn--primary form__submit" type="submit" disabled>Отправить заявку</button>
+          <p class="form__note">Нажимая «Отправить заявку», вы соглашаетесь на обработку персональных данных.</p>
+        </form>
+      </div>
+
+      <!-- Экран успеха (показывается после отправки) -->
+      <div class="form-success" data-success hidden>
+        <div class="form-success__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12.5l4.5 4.5L19.5 7"/></svg>
+        </div>
+        <h3>Заявка отправлена</h3>
+        <p>Форма подготовлена к подключению CRM. После настройки заявки будут автоматически передаваться в работу.</p>
+        <button class="btn btn--outline" type="button" data-modal-close>Хорошо</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/main.js" defer></script>
+</body>
+</html>
