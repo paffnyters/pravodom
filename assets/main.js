@@ -83,6 +83,20 @@
   }
 
   /* ------------------------------------------------------------
+   * 2.1. TURNSTILE: скрыть виджет, если sitekey не вставлен
+   * ----------------------------------------------------------
+   * Если в HTML осталась заглушка REPLACE_WITH_TURNSTILE_SITEKEY
+   * или data-sitekey пустой — Cloudflare Turnstile выдаёт ошибку
+   * 400020 и спамит в консоль. Скрываем div, чтобы не мешал.
+   * Когда sitekey будет вставлен — виджет автоматически появится. */
+  document.querySelectorAll('.cf-turnstile').forEach(function (w) {
+    var sk = w.getAttribute('data-sitekey') || '';
+    if (!sk || sk === 'REPLACE_WITH_TURNSTILE_SITEKEY') {
+      w.style.display = 'none';
+    }
+  });
+
+  /* ------------------------------------------------------------
    * 3. МОДАЛЬНОЕ ОКНО ЗАЯВКИ
    * ---------------------------------------------------------- */
   var modal = document.getElementById('zayavka');
