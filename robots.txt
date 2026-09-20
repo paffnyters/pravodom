@@ -1,7 +1,19 @@
+# robots.txt для Праводом.рф
+# Юридическая практика Дмитрия Кисельмана
+
 User-agent: Googlebot
 Allow: /
 
+User-agent: Googlebot-Image
+Allow: /
+
 User-agent: Bingbot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: YandexImages
 Allow: /
 
 User-agent: Twitterbot
@@ -10,5 +22,30 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Блокируем индексацию служебных и технических страниц
 User-agent: *
 Allow: /
+Disallow: /*?
+Disallow: /*&
+Disallow: /search
+Disallow: /tag
+Disallow: /author
+Disallow: /wp-
+Disallow: /cgi-bin
+Disallow: /tmp/
+Disallow: /*.pdf$
+Disallow: /*.doc$
+Disallow: /*.docx$
+
+# Хост и карта сайта — указываем в punycode для надёжной обработки роботами
+Host: xn--80aeg6aibci.xn--p1ai
+Sitemap: https://xn--80aeg6aibci.xn--p1ai/sitemap.xml

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Главная страница — общая юридическая помощь -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Залив квартиры — что делать, как взыскать ущерб -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/zalyv/</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Юрист после ДТП — помощь с возмещением ущерба -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/dtp/</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Жилищные споры — помощь юриста -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/zhilishchnye-spory/</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Взыскание задолженности для управляющих организаций -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/dolgi/</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Политика конфиденциальности -->
+  <url>
+    <loc>https://xn--80aeg6aibci.xn--p1ai/privacy.html</loc>
+    <lastmod>2026-09-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
