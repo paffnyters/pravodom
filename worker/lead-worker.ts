@@ -188,7 +188,19 @@ async function findClientsPipeline(env) {
     if (!stageRes.ok) throw new Error(`Stage fetch error ${stageRes.status}`);
     const stages = await stageRes.json();
     if (!stages.length) {
-      throw new Error(`Стадия с id ${env.CLIENTS_FIRST_STAGE_ID} не найдена в crm_pipeline_stages`);
+      // Отладка: показать все стадии, чтобы пользователь мог выбрать правильный ID
+      const allStagesRes = await fetch(
+        `${sbUrl}/rest/v1/crm_pipeline_stages?select=id,name,pipeline_id,sort_order,active&order=sort_order&limit=50`,
+        { headers: sbHeaders(sbKey) }
+      );
+      let allStages = [];
+      if (allStagesRes.ok) allStages = await allStagesRes.json();
+      const stageList = allStages.map(s => `id=${s.id} | name="${s.name}" | pipeline_id=${s.pipeline_id} | sort=${s.sort_order} | active=${s.active}`).join("\n  ");
+      throw new Error(
+        `Стадия с id ${env.CLIENTS_FIRST_STAGE_ID} не найдена в crm_pipeline_stages.\n\n` +
+        `Доступные стадии в таблице:\n  ${stageList || "(пусто)"}\n\n` +
+        `Скопируй правильный id из списка выше и обнови переменную CLIENTS_FIRST_STAGE_ID в Worker.`
+      );
     }
     const stage = stages[0];
     if (!stage.pipeline_id) throw new Error("У стадии нет pipeline_id");
