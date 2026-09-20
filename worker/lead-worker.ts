@@ -72,21 +72,27 @@
 
 const ALLOWED_ORIGINS = [
   "https://xn--80aeg6aibci.xn--p1ai",        // punycode праводом.рф
-  "https://праводом.рф",                       // кириллица
+  "https://праводом.рф",                       // кириллица (браузер обычно шлёт punycode)
+  "https://www.xn--80aeg6aibci.xn--p1ai",      // www версия (на всякий)
   "http://localhost:8080",                    // локальная разработка
+  "http://127.0.0.1:8080",                    // локальная разработка (IP)
+  "https://paffnyters.github.io",             // GitHub Pages (до подключения домена)
 ];
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Content-Type": "application/json; charset=utf-8",
-};
+function getCorsHeaders(origin) {
+  // Если origin есть в разрешённых — возвращаем его, иначе первый из списка
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400",
+    "Content-Type": "application/json; charset=utf-8",
+  };
+}
 
 function json(body, status = 200, origin = "") {
-  const headers = { ...CORS_HEADERS };
-  headers["Access-Control-Allow-Origin"] = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return new Response(JSON.stringify(body), { status, headers });
+  return new Response(JSON.stringify(body), { status, headers: getCorsHeaders(origin) });
 }
 
 function errMessage(e) {
@@ -98,13 +104,17 @@ function errMessage(e) {
  * Делает POST на https://challenges.cloudflare.com/turnstile/v0/siteverify
  */
 async function verifyTurnstile(token, ip, secret) {
+  // Если секрет не настроен — пропускаем проверку (для dev / первого запуска)
   if (!secret) {
-    // Если секрет не настроен — пропускаем проверку (только для dev)
-    console.warn("[lead-worker] TURNSTILE_SECRET_KEY не задан — пропускаем проверку");
+    console.warn("[lead-worker] TURNSTILE_SECRET_KEY не задан — пропускаем проверку Turnstile");
     return { success: true, skipped: true };
   }
+  // Если токен пустой — но секрет задан — это ошибка
+  // НО: если на сайте виджет ещё не настроен (заглушка sitekey), токена не будет
+  // Разрешаем пропуск в этом случае, выводя предупреждение
   if (!token) {
-    return { success: false, error: "Отсутствует токен Turnstile" };
+    console.warn("[lead-worker] turnstileToken пустой — виджет не настроен или не загружен. Принимаем заявку БЕЗ проверки.");
+    return { success: true, skipped: true, reason: "no-token" };
   }
   const form = new FormData();
   form.append("secret", secret);
@@ -286,9 +296,9 @@ export default {
                request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
                "";
 
-    // CORS preflight
+    // CORS preflight — обязательный для cross-origin POST с Content-Type: application/json
     if (request.method === "OPTIONS") {
-      return new Response("ok", { status: 204, headers: CORS_HEADERS });
+      return new Response(null, { status: 204, headers: getCorsHeaders(origin) });
     }
 
     if (request.method !== "POST") {

@@ -37,7 +37,7 @@
    *      secrets как SUPABASE_SERVICE_ROLE_KEY
    * ---------------------------------------------------------- */
   var FORM_CONFIG = {
-    endpoint: '/api/lead',         // Cloudflare Worker endpoint
+    endpoint: 'https://pravodom-lead.paffnyters.workers.dev/lead',  // Cloudflare Worker
     turnstileSiteKey: '',           // подставится автоматически из DOM
     demoSuccess: false             // не показывать фейковый успех
   };
@@ -213,9 +213,16 @@
     return ok;
   }
 
-  /* 4.4. Получение токена Turnstile (если виджет есть) */
+  /* 4.4. Получение токена Turnstile (если виджет активен) */
+  function isTurnstileActive() {
+    if (!turnstileWidget) return false;
+    var sk = turnstileWidget.getAttribute('data-sitekey') || '';
+    // Если sitekey не вставлен (заглушка) — виджет не активен, пропускаем
+    if (!sk || sk === 'REPLACE_WITH_TURNSTILE_SITEKEY') return false;
+    return true;
+  }
   function getTurnstileToken() {
-    if (!turnstileWidget || typeof window.turnstile === 'undefined') return '';
+    if (!isTurnstileActive() || typeof window.turnstile === 'undefined') return '';
     var wId = turnstileWidget.querySelector('[name="cf-turnstile-response"]') ||
               turnstileWidget.querySelector('input[type="hidden"]');
     if (wId) return wId.value || '';
@@ -246,8 +253,8 @@
     }
 
     var turnstileToken = getTurnstileToken();
-    if (turnstileWidget && !turnstileToken) {
-      // Turnstile ещё не загрузился или не пройден — подождём
+    // Если виджет активен (sitekey вставлен) и токена нет — ждём
+    if (isTurnstileActive() && !turnstileToken) {
       submitBtn.textContent = 'Подождите проверку…';
       setTimeout(function () {
         var t = getTurnstileToken();
@@ -262,6 +269,7 @@
       }, 800);
       return;
     }
+    // Виджет не активен (sitekey заглушка) — отправляем без токена
     submitForm(turnstileToken);
   });
 
