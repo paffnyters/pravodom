@@ -8,6 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="assets/fonts/fonts.css">
   <link rel="stylesheet" href="assets/style.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -173,6 +174,24 @@
           <input type="email" id="f-email" name="email" placeholder="mail@example.com" autocomplete="email">
           <small class="field__err">Проверьте адрес электронной почты</small>
         </div>
+        <div class="field">
+          <label for="f-service">Вид услуги <span class="req">*</span></label>
+          <select id="f-service" name="service_type" required>
+            <option value="">— выберите —</option>
+            <option value="dolgi">Взыскание задолженности (для УК и ТСЖ)</option>
+            <option value="zalyv">Залив квартиры</option>
+            <option value="dtp">Юрист после ДТП</option>
+            <option value="zhilishchnye-spory">Жилищные споры</option>
+            <option value="other" selected>Другое / не уверен</option>
+          </select>
+          <small class="field__err">Укажите вид услуги</small>
+        </div>
+
+        <div class="field">
+          <label for="f-comment">Комментарий <span style="color:var(--muted);font-weight:500">(необязательно)</span></label>
+          <textarea id="f-comment" name="comment" placeholder="Кратко опишите ситуацию" rows="3"></textarea>
+        </div>
+
 
         <label class="consent">
           <input type="checkbox" id="f-consent" name="consent" required>
@@ -181,6 +200,9 @@
         </label>
 
         <!-- TODO CAPTCHA: место для Cloudflare Turnstile (см. комментарии в main.js) -->
+        <!-- Cloudflare Turnstile: анти-бот/анти-DDoS проверка -->
+        <div class="cf-turnstile" data-sitekey="REPLACE_WITH_TURNSTILE_SITEKEY" data-theme="light"></div>
+
         <button class="btn btn--primary form__submit" type="submit" disabled>Отправить заявку</button>
         <p class="form__note">Нажимая «Отправить заявку», вы соглашаетесь на обработку персональных данных.</p>
       </form>

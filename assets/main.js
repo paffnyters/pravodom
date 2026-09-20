@@ -17,33 +17,41 @@
   /* ------------------------------------------------------------
    * 1. КОНФИГ ФОРМЫ
    * ------------------------------------------------------------
-   * TODO CRM: когда будет backend — укажите здесь URL приёма заявок
-   * (например '/api/lead' или URL webhook CRM: Bitrix24/amoCRM/…).
-   * Форма шлёт POST c JSON:
-   *   { name, phone, email, consent, source, website (honeypot),
-   *     turnstileToken, pageUrl, submittedAt }
+   * Endpoint Cloudflare Worker, который принимает заявки и пишет
+   * их в Supabase (таблица crm_cases, воронка «Клиенты»).
    *
-   * TODO BACKEND-требования (реализуются на сервере, не здесь):
-   *   - серверная валидация полей (имя, телефон, email);
-   *   - rate limiting по IP (например 3–5 заявок в час);
-   *   - проверка honeypot и CAPTCHA на сервере;
-   *   - уведомления: Telegram-бот и/или email (SMTP).
+   * Worker URL: тот же домен + /api/lead (через Cloudflare Pages
+   * Functions или Cloudflare Worker на отдельном поддомене).
+   *
+   * Защита от спама/DDoS:
+   *   - Cloudflare Turnstile (CAPTCHA без боли для пользователя)
+   *   - Honeypot поле website (скрытое)
+   *   - Server-side rate limit (см. Worker)
+   *   - Cloudflare Bot Fight Mode + WAF на уровне всего сайта
+   *
+   * Чтобы включить:
+   *   1. Задеплоить Worker (см. /worker/lead-worker.ts в ZIP)
+   *   2. В Cloudflare создать Turnstile widget — sitekey вставить
+   *      в HTML (data-sitekey) и в Worker secrets (TURNSTILE_SECRET)
+   *   3. В Supabase создать service role key и сохранить в Worker
+   *      secrets как SUPABASE_SERVICE_ROLE_KEY
    * ---------------------------------------------------------- */
   var FORM_CONFIG = {
-    endpoint: '',            // TODO: URL API/CRM. Пусто = демо-режим без отправки.
-    turnstileSiteKey: '',    // TODO: sitekey Cloudflare Turnstile (см. разметку модалки)
-    demoSuccess: true        // демо-режим: показывать экран «Заявка отправлена» без backend
+    endpoint: '/api/lead',         // Cloudflare Worker endpoint
+    turnstileSiteKey: '',           // подставится автоматически из DOM
+    demoSuccess: false             // не показывать фейковый успех
   };
 
-  /* Точка интеграции CRM. Ничего не делает, пока endpoint не задан. */
+  /* Точка интеграции CRM: POST на Cloudflare Worker. */
   function sendToBackend(payload) {
-    // TODO CRM: заменить на реальный вызов API, например:
-    //   return fetch(FORM_CONFIG.endpoint, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(payload)
-    //   }).then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); });
-    return Promise.resolve({ demo: true });
+    return fetch(FORM_CONFIG.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    });
   }
 
   /* ------------------------------------------------------------
@@ -135,11 +143,14 @@
   var nameInput = form.querySelector('input[name="name"]');
   var phoneInput = form.querySelector('input[name="phone"]');
   var emailInput = form.querySelector('input[name="email"]');
+  var serviceSelect = form.querySelector('select[name="service_type"]');
+  var commentInput = form.querySelector('textarea[name="comment"]');
   var consent = form.querySelector('input[name="consent"]');
   var honeypot = form.querySelector('input[name="website"]');
   var submitBtn = form.querySelector('button[type="submit"]');
   var formWrap = document.querySelector('[data-form-wrap]');
   var successPane = document.querySelector('[data-success]');
+  var turnstileWidget = form.querySelector('.cf-turnstile');
 
   // Скрытое поле-метка источника (для CRM)
   var sourceInput = document.createElement('input');
@@ -186,8 +197,11 @@
   [nameInput, phoneInput, emailInput].forEach(function (inp) {
     inp.addEventListener('input', function () { setError(inp, false); });
   });
+  if (serviceSelect) {
+    serviceSelect.addEventListener('change', function () { setError(serviceSelect, false); });
+  }
 
-  /* 4.3. Валидация (клиентская; серверную см. TODO BACKEND выше) */
+  /* 4.3. Валидация (клиентская; серверную см. в Worker) */
   function validate() {
     var ok = true;
     if (nameInput.value.trim().length < 2) { setError(nameInput, true); ok = false; }
@@ -195,10 +209,25 @@
     if (digits.length < 11) { setError(phoneInput, true); ok = false; }
     var email = emailInput.value.trim();
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setError(emailInput, true); ok = false; }
+    if (serviceSelect && !serviceSelect.value) { setError(serviceSelect, true); ok = false; }
     return ok;
   }
 
-  /* 4.4. Отправка */
+  /* 4.4. Получение токена Turnstile (если виджет есть) */
+  function getTurnstileToken() {
+    if (!turnstileWidget || typeof window.turnstile === 'undefined') return '';
+    var wId = turnstileWidget.querySelector('[name="cf-turnstile-response"]') ||
+              turnstileWidget.querySelector('input[type="hidden"]');
+    if (wId) return wId.value || '';
+    // Запасной вариант: глобальный API Turnstile
+    try {
+      var widgetId = turnstileWidget.dataset.widgetId;
+      if (widgetId && window.turnstile.getResponse) return window.turnstile.getResponse(widgetId) || '';
+    } catch (e) {}
+    return '';
+  }
+
+  /* 4.5. Отправка */
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -211,43 +240,87 @@
     // Страховка: без согласия отправка невозможна
     if (!consent.checked || submitBtn.disabled) return;
     if (!validate()) {
-      var errField = form.querySelector('.field--error input');
+      var errField = form.querySelector('.field--error input, .field--error select');
       if (errField) errField.focus();
       return;
     }
+
+    var turnstileToken = getTurnstileToken();
+    if (turnstileWidget && !turnstileToken) {
+      // Turnstile ещё не загрузился или не пройден — подождём
+      submitBtn.textContent = 'Подождите проверку…';
+      setTimeout(function () {
+        var t = getTurnstileToken();
+        if (t) { submitBtn.textContent = 'Отправляем…'; submitForm(t); }
+        else {
+          submitBtn.textContent = 'Подтвердите проверку';
+          setTimeout(function () {
+            submitBtn.textContent = 'Отправить заявку';
+            syncConsent();
+          }, 2000);
+        }
+      }, 800);
+      return;
+    }
+    submitForm(turnstileToken);
+  });
+
+  function submitForm(turnstileToken) {
+    // Определяем source_page по URL: /zalyv/ → 'site_zalyv' и т.д.
+    var pageUrl = window.location.pathname;
+    var sourcePage = 'site_main';
+    if (pageUrl.indexOf('/zalyv') === 0) sourcePage = 'site_zalyv';
+    else if (pageUrl.indexOf('/dtp') === 0) sourcePage = 'site_dtp';
+    else if (pageUrl.indexOf('/zhilishchnye-spory') === 0) sourcePage = 'site_zhilishchnye_spory';
+    else if (pageUrl.indexOf('/dolgi') === 0) sourcePage = 'site_dolgi';
+    else if (pageUrl.indexOf('/privacy') === 0) sourcePage = 'site_privacy';
+
+    var serviceValue = serviceSelect ? serviceSelect.value : 'other';
+    var title = nameInput.value.trim() + ' — ' + (
+      { 'dolgi':'Взыскание для УК','zalyv':'Залив','dtp':'ДТП',
+        'zhilishchnye-spory':'Жилищные споры','other':'Общее' }[serviceValue] || 'Общее'
+    );
 
     var payload = {
       name: nameInput.value.trim(),
       phone: phoneInput.value.trim(),
       email: emailInput.value.trim(),
+      service_type: serviceValue,
+      comment: commentInput ? commentInput.value.trim() : '',
       consent: true,
-      source: sourceInput.value || 'organic',
+      source: sourcePage,                 // метка источника для CRM
+      sourcePage: sourcePage,             // дублирующее поле для бэка
       pageUrl: window.location.href,
       submittedAt: new Date().toISOString(),
-      website: honeypot ? honeypot.value : ''
-      // TODO Turnstile: добавить turnstileToken из виджета CAPTCHA
+      website: honeypot ? honeypot.value : '',       // honeypot
+      turnstileToken: turnstileToken,                // Cloudflare Turnstile
+      // title для crm_cases — соберём на бэке, но продублируем:
+      caseTitle: title
     };
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Отправляем…';
 
     sendToBackend(payload)
-      .then(function () {
-        if (!FORM_CONFIG.endpoint && FORM_CONFIG.demoSuccess) {
-          console.info('[Праводом] Демо-режим: endpoint не задан в FORM_CONFIG (main.js). ' +
-            'Заявка НЕ отправлена на сервер — подключите CRM/API.');
+      .then(function (data) {
+        if (data && data.ok === false) {
+          throw new Error(data.error || 'Сервер отклонил заявку');
         }
         showSuccess();
       })
       .catch(function (err) {
         console.error('[Праводом] Ошибка отправки:', err);
         submitBtn.textContent = 'Ошибка. Попробуйте ещё раз';
+        // Сброс Turnstile для повторной попытки
+        if (turnstileWidget && window.turnstile && turnstileWidget.dataset.widgetId) {
+          try { window.turnstile.reset(turnstileWidget.dataset.widgetId); } catch (e) {}
+        }
         setTimeout(function () {
           submitBtn.textContent = 'Отправить заявку';
           syncConsent();
         }, 2200);
       });
-  });
+  }
 
   function showSuccess() {
     if (formWrap && successPane) {
