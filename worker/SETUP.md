@@ -130,18 +130,34 @@ Supabase (таблица crm_cases)
 <a name="шаг-5-worker"></a>
 ## Шаг 5: Задеплоить Cloudflare Worker
 
-**Вариант А — через Dashboard (проще):**
+### Порядок действий (Важно!)
 
-1. Зайди на https://dash.cloudflare.com → **Workers & Pages**
-2. Нажми **Create application** → **Create Worker**
-3. Имя: `pravodom-lead` (или любое)
-4. Нажми **Deploy**
-5. После создания — нажми **Edit code**
-6. Скопируй содержимое файла `worker/lead-worker.ts` из этого ZIP
-7. Вставь в редактор (замени стандартный код)
-8. Нажми **Save and deploy**
+**Сначала деплой → потом переменные.**
 
-**Вариант Б — через wrangler CLI:**
+1. Задеплоить Worker с кодом (см. ниже)
+2. После деплоя — добавить переменные в Settings → Variables
+3. Переменные применяются автоматически, без повторного деплоя
+
+### Вариант А — через Dashboard (рекомендуется для начала)
+
+1. Зайди на https://dash.cloudflare.com
+2. В левом меню нажми **Workers & Pages**
+3. Нажми синюю кнопку **Create** (или Create Worker)
+4. Имя Worker: `pravodom-lead` (или любое на твоё усмотрение)
+5. Нажми **Deploy** — Worker создастся с дефолтным кодом "Hello World"
+6. В списке Workers найди свой `pravodom-lead` → открой его
+7. В верхнем меню Worker-а найди кнопку **Edit code** (правая верхняя) — нажми её
+8. Откроется редактор кода
+9. Удали ВЕСЬ стандартный код из редактора
+10. Открой файл `worker/lead-worker.ts` из ZIP
+11. Скопируй всё содержимое в буфер обмена (Ctrl+A → Ctrl+C)
+12. Вставь в редактор Cloudflare (Ctrl+V)
+13. В правом верхнем углу нажми **Deploy**
+14. После деплоя увидишь зелёное «Deployed» в правом верхнем углу
+
+URL Worker: `https://pravodom-lead.<account>.workers.dev` (точный URL виден вверху страницы Worker-а)
+
+### Вариант Б — через wrangler CLI (для опытных)
 
 ```bash
 # Установи wrangler
@@ -164,29 +180,88 @@ wrangler init
 wrangler deploy
 ```
 
-URL Worker будет: `https://pravodom-lead.<account>.workers.dev`
-
 ---
 
 <a name="шаг-6-route"></a>
 ## Шаг 6: Настроить секреты и переменные Worker
 
-1. В Cloudflare → **Workers & Pages** → открой свой Worker `pravodom-lead`
-2. Вкладка **Settings** → раздел **Variables**
-3. Добавь переменные (нажми **Add**, выбери **Secret** для ключей, **Plain text** для остальных):
+После деплоя Worker-а — добавь переменные. Это можно делать в любое время, изменения применяются автоматически.
 
-| Имя | Тип | Значение |
-|-----|------|---------|
-| `SUPABASE_URL` | Plain text | `https://ncuthxvxiwghjgduchhc.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Secret** | (из Шага 2) |
-| `TURNSTILE_SECRET_KEY` | **Secret** | (из Шага 1) |
-| `CRM_OWNER_USER_ID` | Plain text | (из Шага 4) |
-| `CLIENTS_PIPELINE_ID` | Plain text | (опционально, из Шага 3) |
+### Где искать раздел Variables
 
-4. (Опционально) Привязать KV для rate limit:
-   - Зайди в **Workers & Pages** → **KV** → создай namespace `pravodom-rl`
-   - Вернись в Worker → **Settings** → **Bindings** → **Add binding** → выбери KV → назови `LEAD_KV` → выбери namespace `pravodom-rl`
-5. Нажми **Save and deploy** ещё раз, чтобы применить переменные
+1. Открой свой Worker `pravodom-lead` в Cloudflare Dashboard
+2. В верхнем меню Worker-а (под названием) есть вкладки: **Deployments**, **Triggers**, **Settings**, **Logs**, **Metrics**
+3. Открой вкладку **Settings**
+4. Прокрути вниз до раздела **Variables and Secrets**
+5. Нажми кнопку **Add** под этим разделом
+
+### Список переменных для добавления
+
+Добавляй их по одной, нажимая **Add** для каждой:
+
+#### 6.1 — `SUPABASE_URL`
+- Type: **Text** (Plain text)
+- Variable name: `SUPABASE_URL`
+- Value: `https://ncuthxvxiwghjgduchhc.supabase.co`
+- Нажми **Add** / **Deploy**
+
+#### 6.2 — `SUPABASE_SERVICE_ROLE_KEY` (Secret)
+- Type: **Secret** (НЕ Text! — Secret зашифрован и не виден после сохранения)
+- Variable name: `SUPABASE_SERVICE_ROLE_KEY`
+- Value: вставь твой service_role secret из Supabase Dashboard
+- Нажми **Add** / **Deploy**
+
+#### 6.3 — `TURNSTILE_SECRET_KEY` (Secret)
+- Type: **Secret**
+- Variable name: `TURNSTILE_SECRET_KEY`
+- Value: твой Cloudflare Turnstile Secret Key (создаётся в Cloudflare → Turnstile)
+- Нажми **Add** / **Deploy**
+
+#### 6.4 — `CRM_OWNER_USER_ID`
+- Type: **Text**
+- Variable name: `CRM_OWNER_USER_ID`
+- Value: `537a45a6-c232-4852-975b-61e0f52f8c21` (это твой ID пользователя в Supabase)
+- Нажми **Add** / **Deploy**
+
+#### 6.5 — `CLIENTS_FIRST_STAGE_ID` (Stage ID, опционально но рекомендуется)
+- Type: **Text**
+- Variable name: `CLIENTS_FIRST_STAGE_ID`
+- Value: `09c963e8-e9a1-4350-8283-6aa6917c8a7f` (это ID первой стадии в воронке «Клиенты»)
+- Нажми **Add** / **Deploy**
+
+Worker приоритетно использует именно этот ID — надёжнее всего. Worker сам найдёт pipeline_id по этому stage_id.
+
+#### 6.6 — `CLIENTS_PIPELINE_ID` (Pipeline ID, опционально)
+- Type: **Text**
+- Variable name: `CLIENTS_PIPELINE_ID`
+- Value: (UUID воронки «Клиенты», если знаешь)
+- Нажми **Add** / **Deploy**
+
+Используется, только если не задан `CLIENTS_FIRST_STAGE_ID`.
+
+### Опционально: KV для rate limit
+
+Если хочешь включить rate limit (3 заявки в час с IP):
+
+1. Зайди в Cloudflare → **Workers & Pages** → **KV**
+2. Нажми **Create a namespace** → имя `pravodom-rl` → **Add**
+3. Вернись к Worker `pravodom-lead` → **Settings** → **Bindings**
+4. Нажми **Add binding** → выбери **KV Namespace**
+5. Variable name: `LEAD_KV`
+6. KV namespace: `pravodom-rl`
+7. Нажми **Save** / **Deploy**
+
+### Что произойдёт после добавления всех переменных
+
+Worker мгновенно начнёт использовать новые значения. Никакого повторного деплоя не нужно — Cloudflare подхватывает переменные автоматически.
+
+### Как проверить что переменные подхватились
+
+1. Открой Worker → вкладка **Logs**
+2. Нажми **Begin log stream**
+3. Открой сайт `https://праводом.рф/dolgi/`
+4. Нажми «Передать список должников» → заполни форму → отправь
+5. В Logs увидишь либо успешное выполнение, либо конкретную ошибку (например «SUPABASE_URL не задан» если забыл переменную)
 
 ---
 

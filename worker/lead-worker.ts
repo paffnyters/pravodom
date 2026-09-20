@@ -154,15 +154,38 @@ async function checkRateLimit(ip, env) {
 }
 
 /**
- * Найти воронку по имени «Клиенты» (или ID, если задан env.CLIENTS_PIPELINE_ID).
- * Возвращает { pipeline_id, stage_id } или null.
+ * Найти воронку «Клиенты» и её первую стадию.
+ * Приоритеты:
+ *   1) Если задан env.CLIENTS_FIRST_STAGE_ID — используем его напрямую
+ *      (нужно ещё узнать pipeline_id по этому stage_id).
+ *   2) Иначе если задан env.CLIENTS_PIPELINE_ID — берём его + первую активную стадию.
+ *   3) Иначе ищем воронку по имени «Клиенты» (ilike '%Клиент%') + первую стадию.
+ *
+ * Возвращает { pipeline_id, stage_id }.
  */
 async function findClientsPipeline(env) {
   const sbUrl = env.SUPABASE_URL;
   const sbKey = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!sbUrl || !sbKey) throw new Error("SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY не заданы");
 
-  // 1. Если задан явный ID воронки — используем его
+  // 1. Если задан явный ID стадии — используем его напрямую
+  if (env.CLIENTS_FIRST_STAGE_ID) {
+    // Получим pipeline_id по stage_id
+    const stageRes = await fetch(
+      `${sbUrl}/rest/v1/crm_pipeline_stages?id=eq.${env.CLIENTS_FIRST_STAGE_ID}&limit=1`,
+      { headers: sbHeaders(sbKey) }
+    );
+    if (!stageRes.ok) throw new Error(`Stage fetch error ${stageRes.status}`);
+    const stages = await stageRes.json();
+    if (!stages.length) {
+      throw new Error(`Стадия с id ${env.CLIENTS_FIRST_STAGE_ID} не найдена в crm_pipeline_stages`);
+    }
+    const stage = stages[0];
+    if (!stage.pipeline_id) throw new Error("У стадии нет pipeline_id");
+    return { pipeline_id: stage.pipeline_id, stage_id: stage.id };
+  }
+
+  // 2. Если задан явный ID воронки — используем его + первую активную стадию
   if (env.CLIENTS_PIPELINE_ID) {
     const stageRes = await fetch(
       `${sbUrl}/rest/v1/crm_pipeline_stages?pipeline_id=eq.${env.CLIENTS_PIPELINE_ID}&active=eq.true&order=sort_order&limit=1`,
@@ -174,18 +197,19 @@ async function findClientsPipeline(env) {
     return { pipeline_id: env.CLIENTS_PIPELINE_ID, stage_id: stages[0].id };
   }
 
-  // 2. Иначе ищем воронку по имени (case-insensitive) «Клиенты»
-  //    entity_type='case' — это юридическая воронка (как в коде CRM pipelineFor('case'))
+  // 3. Иначе ищем воронку по имени «Клиенты» (case-insensitive, содержит «Клиент»)
   const pipeRes = await fetch(
     `${sbUrl}/rest/v1/crm_pipelines?name=ilike.%25%D0%9A%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%25&active=eq.true&limit=1`,
     { headers: sbHeaders(sbKey) }
   );
   if (!pipeRes.ok) throw new Error(`Pipeline fetch error ${pipeRes.status}: ${await pipeRes.text()}`);
   const pipes = await pipeRes.json();
-  if (!pipes.length) throw new Error("Воронка «Клиенты» не найдена. Создайте её в CRM или задайте CLIENTS_PIPELINE_ID.");
+  if (!pipes.length) {
+    throw new Error("Воронка «Клиенты» не найдена. Создайте её в CRM или задайте CLIENTS_PIPELINE_ID/CLIENTS_FIRST_STAGE_ID.");
+  }
   const pipeline = pipes[0];
 
-  // 3. Найти первую стадию этой воронки
+  // 4. Найти первую стадию этой воронки
   const stageRes = await fetch(
     `${sbUrl}/rest/v1/crm_pipeline_stages?pipeline_id=eq.${pipeline.id}&active=eq.true&order=sort_order&limit=1`,
     { headers: sbHeaders(sbKey) }
