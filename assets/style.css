@@ -40,6 +40,26 @@ body{
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
+
+/* -------- Основной скроллбар страницы — в фирменном стиле -------- */
+/* Firefox */
+html{scrollbar-width:thin;scrollbar-color:rgba(62,143,206,.5) rgba(62,143,206,.08)}
+/* WebKit (Chrome, Safari, Edge) */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:rgba(62,143,206,.06)}
+::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,var(--cta) 0%,var(--cta-deep) 100%);
+  border-radius:99px;
+  border:2px solid transparent;
+  background-clip:content-box;
+  min-height:40px;
+}
+::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,var(--cta-strong) 0%,var(--navy-700) 100%);
+  background-clip:content-box;
+  border:2px solid transparent;
+}
+::-webkit-scrollbar-corner{background:transparent}
 img{max-width:100%;display:block}
 a{color:var(--cta-deep);text-decoration:none}
 a:hover{color:var(--cta-strong)}
@@ -512,17 +532,24 @@ body.nav-open{overflow:hidden}
 .footer__dev{
   display:inline-flex;
   align-items:center;
-  gap:8px;
-  padding:4px 0;
-  opacity:.85;
-  transition:opacity .2s;
+  gap:10px;
+  padding:6px 12px;
+  background:rgba(255,255,255,.06);
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.1);
+  transition:background .2s,border-color .2s,transform .2s;
 }
-.footer__dev:hover{opacity:1}
+.footer__dev:hover{
+  background:rgba(255,255,255,.1);
+  border-color:rgba(255,255,255,.25);
+  transform:translateY(-1px);
+}
 .footer__dev-label{
-  font-size:.78rem;
-  color:rgba(255,255,255,.5);
+  font-size:.76rem;
+  color:rgba(255,255,255,.55);
   font-weight:500;
-  letter-spacing:.02em;
+  letter-spacing:.04em;
+  text-transform:uppercase;
 }
 .footer__dev-link{
   display:inline-flex;
@@ -531,20 +558,14 @@ body.nav-open{overflow:hidden}
   border-bottom:none;
 }
 .footer__dev-logo{
-  height:28px;
+  height:40px;
   width:auto;
-  opacity:.85;
-  transition:opacity .2s,transform .2s;
-  filter:grayscale(40%);
-}
-.footer__dev-logo:hover{
-  opacity:1;
-  transform:scale(1.04);
-  filter:grayscale(0);
+  display:block;
 }
 @media (max-width:680px){
   .footer__bottom{flex-direction:column;align-items:flex-start;gap:14px}
-  .footer__dev{margin-left:auto}
+  .footer__dev{margin-left:0}
+  .footer__dev-logo{height:32px}
 }
 
 /* -------- Модальное окно заявки -------- */
