@@ -136,6 +136,42 @@
   }
   </script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <!-- ================= Security Headers (через meta) ================= -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://mc.yandex.ru; style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; img-src 'self' data: blob: https://mc.yandex.ru https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://pravodom-lead.paffnyters.workers.dev https://challenges.cloudflare.com https://ncuthxvxiwghjgduchhc.supabase.co https://mc.yandex.ru https://www.google-analytics.com https://www.googletagmanager.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="color-scheme" content="light">
+  <meta name="permissions-policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()">
+
+  <!-- ================= Yandex.Metrika ================= -->
+  <!-- Замените XXXXXXXXXX на номер вашего счётчика Yandex.Metrika -->
+  <script type="text/javascript">
+    (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+    m[i].l=1*new Date();
+    for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+    k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+    (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+    ym(XXXXXXXXXX, "init", {
+      clickmap:true,
+      trackLinks:true,
+      accurateTrackBounce:true,
+      webvisor:true
+    });
+  </script>
+  <noscript>
+    <div><img src="https://mc.yandex.ru/watch/XXXXXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
+  </noscript>
+
+  <!-- ================= Google Analytics 4 ================= -->
+  <!-- Замените G-XXXXXXXXXX на ваш Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX', { 'anonymize_ip': true });
+  </script>
+
 </head>
 <body>
 
@@ -156,10 +192,11 @@
     </a>
     <nav class="nav" aria-label="Основная навигация">
       <a class="nav__link" href="/">Главная</a>
-      <a class="nav__link" href="../zalyv/">Залив</a>
-      <a class="nav__link" href="../dtp/">ДТП</a>
-      <a class="nav__link" href="../zhilishchnye-spory/">Жилищные споры</a>
-      <a class="nav__link" href="#dolgi-yurist">О юристе</a>
+      <a class="nav__link" href="/zalyv/">Залив</a>
+      <a class="nav__link" href="/dtp/">ДТП</a>
+      <a class="nav__link" href="/zhilishchnye-spory/">Жилищные споры</a>
+      <a class="nav__link" href="/dolgi/">Для УК</a>
+      <a class="nav__link" href="#yurist">О юристе</a>
     </nav>
     <div class="header__right">
       <!-- TODO: заменить телефон-заглушку на реальный номер -->
@@ -173,12 +210,13 @@
   </div>
   <div class="mobile-menu">
     <a href="/">Главная</a>
-    <a href="../zalyv/">Залив квартиры</a>
-    <a href="../dtp/">Юрист после ДТП</a>
-    <a href="../zhilishchnye-spory/">Жилищные споры</a>
-    <a href="#dolgi-yurist">О юристе</a>
+    <a href="/zalyv/">Залив квартиры</a>
+    <a href="/dtp/">Юрист после ДТП</a>
+    <a href="/zhilishchnye-spory/">Жилищные споры</a>
+    <a href="/dolgi/">Для управляющих организаций</a>
+    <a href="#yurist">О юристе</a>
     <a href="tel:+79123456789">+7 912 345-67-89</a>
-    <button class="btn btn--primary" type="button" data-modal-open data-modal-source="dolgi-header-mobile">Передать должников</button>
+    <button class="btn btn--primary" type="button" data-modal-open>Оставить заявку</button>
   </div>
 </header>
 
@@ -217,6 +255,23 @@
   <!-- ================= ЦЕННОСТЬ (3 пункта) ================= -->
   <section class="section" id="dolgi-value">
     <div class="container">
+
+      <!-- Плашка: работаем только удалённо -->
+      <div class="remote-banner reveal" role="region" aria-label="Информация о формате работы">
+        <div class="remote-banner__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="remote-banner__content">
+          <h3 class="remote-banner__title">Работаем по&nbsp;всей России — только удалённо</h3>
+          <p class="remote-banner__text">Мы&nbsp;ведём дела УК и&nbsp;ТСЖ из&nbsp;любого региона: присылаете документы электронно — получаете готовые судебные приказы и&nbsp;регулярную отчётность. Без командировок, без личных встреч, без задержек.</p>
+          <ul class="remote-banner__list">
+            <li>Электронный документооборот — через email или мессенджеры</li>
+            <li>Готовые приказы направляем в&nbsp;УК в&nbsp;электронном виде</li>
+            <li>Сопровождение до&nbsp;исполнения — без географической привязки</li>
+          </ul>
+        </div>
+      </div>
+
       <div class="sec-head reveal">
         <p class="eyebrow">Почему выбирают нас</p>
         <h2>Прозрачная цена и&nbsp;опыт в&nbsp;жилищной сфере</h2>
@@ -400,7 +455,7 @@
   </section>
 
   <!-- ================= ЮРИСТ ================= -->
-  <section class="lawyer" id="dolgi-yurist">
+  <section class="lawyer" id="yurist">
     <div class="container">
       <div class="lawyer__grid">
         <div class="lawyer__photo-wrap reveal">

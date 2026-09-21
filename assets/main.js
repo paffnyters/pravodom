@@ -98,6 +98,32 @@
   });
 
   /* ------------------------------------------------------------
+   * 2.2. ПОДСВЕТКА АКТИВНОЙ СТРАНИЦЫ В НАВИГАЦИИ
+   * ----------------------------------------------------------
+   * На всех страницах одинаковый набор кнопок в шапке.
+   * Скрипт сравнивает URL текущей страницы с href каждой ссылки
+   * и добавляет класс .nav__link--active к совпадающей. */
+  (function highlightActiveNav() {
+    var currentPath = window.location.pathname.replace(/\/index\.html$/, '/');
+    if (!currentPath.endsWith('/')) currentPath = currentPath + '/';
+    if (currentPath === '//') currentPath = '/';
+    document.querySelectorAll('.nav__link, .mobile-menu a').forEach(function (link) {
+      var href = link.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('tel:') || href.startsWith('mailto:')) return;
+      try {
+        var linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/index\.html$/, '/');
+        if (!linkPath.endsWith('/')) linkPath = linkPath + '/';
+        var isHome = (linkPath === '/' && currentPath === '/');
+        var isSection = (linkPath !== '/' && currentPath.indexOf(linkPath.replace(/\/$/, '')) === 0);
+        if (isHome || isSection) {
+          link.classList.add('nav__link--active');
+          link.setAttribute('aria-current', 'page');
+        }
+      } catch (e) { /* ignore */ }
+    });
+  })();
+
+  /* ------------------------------------------------------------
    * 3. МОДАЛЬНОЕ ОКНО ЗАЯВКИ
    * ---------------------------------------------------------- */
   var modal = document.getElementById('zayavka');
@@ -350,6 +376,24 @@
       formWrap.hidden = true;
       successPane.hidden = false;
       successPane.classList.add('show');
+    }
+    // Yandex.Metrika: цель «Заявка отправлена»
+    if (typeof window.ym === 'function') {
+      try {
+        window.ym(window.ymNum || 0, 'reachGoal', 'lead_submitted');
+        console.info('[Праводом] Yandex.Metrika: цель lead_submitted отправлена');
+      } catch (e) { console.warn('[Праводом] Yandex.Metrika error:', e); }
+    }
+    // Google Analytics 4: событие отправки заявки
+    if (typeof window.gtag === 'function') {
+      try {
+        window.gtag('event', 'lead_submitted', {
+          'event_category': 'engagement',
+          'event_label': 'Форма заявки',
+          'value': 1
+        });
+        console.info('[Праводом] Google Analytics: событие lead_submitted отправлено');
+      } catch (e) { console.warn('[Праводом] GA error:', e); }
     }
     form.reset();
     submitBtn.textContent = 'Отправить заявку';
