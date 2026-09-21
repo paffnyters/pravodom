@@ -258,17 +258,33 @@ async function createCase(env, payload, pipeline, ip) {
   const sbUrl = env.SUPABASE_URL;
   const sbKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
-  // source — берем из источника на сайте (site_main, site_zalyv, ...) или 'not_set'
-  const source = payload.source || payload.sourcePage || "not_set";
+  // Source на сайте: site_main, site_zalyv, site_dtp, site_zhilishchnye_spory,
+  // site_dolgi, site_privacy. CRM разрешает только: mailing, dmitry_base, not_set.
+  // Конвертируем: заявка с сайта → 'not_set' (для CRM),
+  // а полную метку источника сохраняем в notes для контекста.
+  const sourcePage = payload.source || payload.sourcePage || "site_unknown";
+  const crmSource = "not_set";   // разрешённое значение CHECK constraint
 
-  // Собираем заметку: комментарий клиента + URL + IP + время
-  const notes = [
+  // Собираем заметку: метка источника + комментарий клиента + URL + IP + время + service_type
+  const serviceLabels = {
+    'dolgi': 'Взыскание задолженности (для УК)',
+    'zalyv': 'Залив квартиры',
+    'dtp': 'Юрист после ДТП',
+    'zhilishchnye-spory': 'Жилищные споры',
+    'other': 'Другое / не указано',
+  };
+  const serviceLabel = serviceLabels[payload.service_type] || payload.service_type || '—';
+
+  const notesParts = [
+    `Источник: ${sourcePage}`,
+    `Вид услуги: ${serviceLabel}`,
     payload.comment ? `Комментарий клиента: ${payload.comment}` : "",
     `Страница: ${payload.pageUrl || "—"}`,
     `IP: ${ip || "—"}`,
     `Время: ${payload.submittedAt || new Date().toISOString()}`,
     payload.email ? `Email: ${payload.email}` : "",
-  ].filter(Boolean).join("\n");
+  ].filter(Boolean);
+  const notes = notesParts.join("\n");
 
   // title для карточки в CRM
   const title = payload.caseTitle || `${payload.name} — заявка с сайта`;
@@ -278,11 +294,10 @@ async function createCase(env, payload, pipeline, ip) {
     legal_pipeline_id: pipeline.pipeline_id,
     legal_stage_id: pipeline.stage_id,
     organization_id: null,        // новая заявка без организации
-    source,                       // 'site_main', 'site_zalyv', ...
+    source: crmSource,            // 'not_set' — проходит CHECK constraint
     notes,
     owner_id: env.CRM_OWNER_USER_ID || null,
     // Если в таблице есть эти поля — запишем. Если нет — Supabase проигнорирует
-    // (но лучше проверить структуру БД)
   };
 
   const res = await fetch(`${sbUrl}/rest/v1/crm_cases`, {
