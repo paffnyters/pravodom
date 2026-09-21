@@ -96,8 +96,8 @@ h3{font-size:1.17rem;font-weight:700}
 .brand__mark{width:42px;height:42px;flex-shrink:0}
 .brand__name{font-size:1.22rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1;display:block}
 .brand__tag{display:block;font-size:.74rem;font-weight:500;color:var(--muted);letter-spacing:.015em;margin-top:2px}
-.nav{display:flex;align-items:center;gap:26px;margin-left:auto}
-.nav__link{color:var(--text);font-weight:500;font-size:.97rem;position:relative;padding:6px 0}
+.nav{display:flex;align-items:center;gap:18px;margin-left:auto;flex-wrap:nowrap}
+.nav__link{color:var(--text);font-weight:500;font-size:.92rem;position:relative;padding:6px 0;white-space:nowrap}
 .nav__link::after{content:"";position:absolute;left:0;bottom:0;width:0;height:2px;background:var(--cta);border-radius:2px;transition:width .22s ease}
 .nav__link:hover{color:var(--navy-800)}
 .nav__link:hover::after{width:100%}
@@ -507,6 +507,45 @@ body.nav-open{overflow:hidden}
 }
 .footer__bottom a{color:rgba(255,255,255,.72)}
 .footer__bottom a:hover{color:#fff}
+
+/* Блок подписи разработчика в футере */
+.footer__dev{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:4px 0;
+  opacity:.85;
+  transition:opacity .2s;
+}
+.footer__dev:hover{opacity:1}
+.footer__dev-label{
+  font-size:.78rem;
+  color:rgba(255,255,255,.5);
+  font-weight:500;
+  letter-spacing:.02em;
+}
+.footer__dev-link{
+  display:inline-flex;
+  align-items:center;
+  text-decoration:none;
+  border-bottom:none;
+}
+.footer__dev-logo{
+  height:28px;
+  width:auto;
+  opacity:.85;
+  transition:opacity .2s,transform .2s;
+  filter:grayscale(40%);
+}
+.footer__dev-logo:hover{
+  opacity:1;
+  transform:scale(1.04);
+  filter:grayscale(0);
+}
+@media (max-width:680px){
+  .footer__bottom{flex-direction:column;align-items:flex-start;gap:14px}
+  .footer__dev{margin-left:auto}
+}
 
 /* -------- Модальное окно заявки -------- */
 .modal{
