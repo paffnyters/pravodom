@@ -321,18 +321,83 @@ body.nav-open{overflow:hidden}
   border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:7px 14px;
 }
 
-/* -------- Детальные блоки «О юристе» (образование/опыт/регион/контакты) -------- */
-.lawyer__details{margin-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:24px 32px}
-.lawyer__detail{padding:22px 24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:var(--radius-md)}
-.lawyer__detail-title{margin:0 0 10px;font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7FB8DF}
-.lawyer__detail-text{margin:0;color:rgba(255,255,255,.86);font-size:.95rem;line-height:1.65}
-.lawyer__detail-list{margin:0;padding-left:18px;color:rgba(255,255,255,.86);font-size:.95rem;line-height:1.7}
-.lawyer__detail-list li{margin-bottom:6px}
-.lawyer__detail--contacts{grid-column:1 / -1}
-.lawyer__contacts{margin:14px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
-.lawyer__contacts li{font-size:.98rem;color:rgba(255,255,255,.92);line-height:1.5}
-.lawyer__contacts a{color:#CFE4F3;text-decoration:none;border-bottom:1px solid rgba(127,184,223,.32);transition:border-color .2s}
-.lawyer__contacts a:hover{border-color:#7FB8DF}
+/* -------- Компактные факты о юристе (плиткой) -------- */
+.lawyer__facts{
+  margin-top:24px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.lawyer__fact{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:12px;
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  transition:background .2s,border-color .2s;
+}
+.lawyer__fact:hover{
+  background:rgba(62,143,206,.10);
+  border-color:rgba(62,143,206,.32);
+}
+.lawyer__fact-label{
+  font-size:.7rem;
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#7FB8DF;
+}
+.lawyer__fact-value{
+  font-size:.92rem;
+  color:#fff;
+  line-height:1.3;
+  font-weight:500;
+}
+@media (max-width:680px){
+  .lawyer__facts{grid-template-columns:1fr 1fr}
+}
+
+/* -------- Контакты юриста — компактно в ряд -------- */
+.lawyer__contacts-row{
+  margin-top:24px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px 20px;
+  align-items:center;
+}
+.lawyer__contact-link{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  color:#CFE4F3;
+  text-decoration:none;
+  font-size:.95rem;
+  line-height:1.3;
+  padding:8px 14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:99px;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.lawyer__contact-link:hover{
+  background:rgba(62,143,206,.15);
+  border-color:rgba(62,143,206,.4);
+  color:#fff;
+}
+.lawyer__contact-link svg{
+  width:18px;
+  height:18px;
+  color:var(--cta);
+  flex-shrink:0;
+}
+.lawyer__contact-link b{color:#fff}
+.lawyer__cta{margin-top:24px}
+@media (max-width:560px){
+  .lawyer__contacts-row{flex-direction:column;align-items:flex-start}
+  .lawyer__contact-link{width:100%;justify-content:flex-start}
+}
 
 /* -------- Статья лендинга (для текстовых страниц — /zalyv/, /dtp/, /zhilishchnye-spory/) -------- */
 .lp-article{
@@ -351,8 +416,6 @@ body.nav-open{overflow:hidden}
 .lp-article ul li{margin-bottom:8px;line-height:1.65;color:var(--navy-700)}
 .lp-article .guide__cta{margin-top:32px}
 @media (max-width:720px){
-  .lawyer__details{grid-template-columns:1fr}
-  .lawyer__detail{padding:18px 20px}
   .lp-article{padding:24px 20px}
 }
 
@@ -436,8 +499,9 @@ body.nav-open{overflow:hidden}
 }
 
 /* -------- Блок цен (для /dolgi/) -------- */
-.price-block{max-width:980px;margin:0 auto}
+.price-block{max-width:1180px;margin:0 auto}
 .price-cards{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;margin:32px 0 28px}
+.price-cards--grid4{grid-template-columns:repeat(4,1fr)}
 .price-card{
   background:var(--panel);
   border:1px solid var(--line);
@@ -496,6 +560,12 @@ body.nav-open{overflow:hidden}
 @media (max-width:760px){
   .price-cards{grid-template-columns:1fr}
   .price-card{padding:24px 20px}
+}
+@media (max-width:1080px){
+  .price-cards--grid4{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:560px){
+  .price-cards--grid4{grid-template-columns:1fr}
 }
 
 /* -------- Полоса «Вернуться» (страница /dolgi/) -------- */
