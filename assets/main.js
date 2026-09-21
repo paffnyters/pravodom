@@ -380,7 +380,7 @@
     // Yandex.Metrika: цель «Заявка отправлена»
     if (typeof window.ym === 'function') {
       try {
-        window.ym(window.ymNum || 0, 'reachGoal', 'lead_submitted');
+        window.ym(112861594, 'reachGoal', 'lead_submitted');
         console.info('[Праводом] Yandex.Metrika: цель lead_submitted отправлена');
       } catch (e) { console.warn('[Праводом] Yandex.Metrika error:', e); }
     }
