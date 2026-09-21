@@ -3,84 +3,40 @@
  *  Праводом.рф — Worker приёма заявок с сайта
  * ============================================================
  *
- * Назначение:
- *   Принимает POST-запросы с формы заявки на сайте,
- *   проверяет Cloudflare Turnstile, honeypot и rate-limit,
- *   создаёт запись в Supabase таблице crm_cases
- *   (воронка «Клиенты», первая стадия).
+ * Endpoint: POST /lead (или любой путь — Worker смотрит только метод)
  *
- * Endpoint:
- *   POST /api/lead
- *   Content-Type: application/json
+ * Что делает:
+ *   - Принимает заявку с сайта (имя, телефон, email, вид услуги, комментарий)
+ *   - Проверяет honeypot, валидирует поля
+ *   - Проверяет Cloudflare Turnstile (опционально)
+ *   - Rate limit: 3 заявки/час с IP (через Cloudflare KV)
+ *   - Создаёт запись в Supabase таблице crm_organizations
+ *     (раздел «Клиенты» в CRM)
+ *   - Воронка: entity_type='organization', первая стадия (sort_order=0)
  *
- * Payload (от браузера):
- *   {
- *     name: string,             // обязателен
- *     phone: string,            // обязателен
- *     email: string,            // опционален
- *     service_type: string,     // 'dolgi' | 'zalyv' | 'dtp' | 'zhilishchnye-spory' | 'other'
- *     comment: string,          // опционален
- *     consent: boolean,         // обязателен
- *     source: string,           // 'site_main' | 'site_zalyv' | ... (метка страницы)
- *     sourcePage: string,       // дублирует source
- *     pageUrl: string,          // URL страницы, с которой пришла заявка
- *     submittedAt: string,      // ISO timestamp
- *     website: string,          // HONEYPOT (если заполнен — заявка молча отбрасывается)
- *     turnstileToken: string,   // токен Cloudflare Turnstile
- *     caseTitle: string         // подсказка для заголовка дела
- *   }
+ * Переменные окружения (Cloudflare Worker → Settings → Variables):
+ *   SUPABASE_URL                  — https://ncuthxvxiwghjgduchhc.supabase.co
+ *   SUPABASE_SERVICE_ROLE_KEY     — sb_service_role_... (Secret!)
+ *   TURNSTILE_SECRET_KEY         — Cloudflare Turnstile secret (Secret, опц.)
+ *   CRM_OWNER_USER_ID            — UUID пользователя в auth.users (для owner_id)
+ *   ORG_PIPELINE_ID              — UUID воронки crm_pipelines с entity_type='organization' (опц.)
+ *   ORG_FIRST_STAGE_ID           — UUID первой стадии в воронке (опц., приоритетнее)
+ *   LEAD_KV                      — Cloudflare KV namespace для rate limit (опц.)
  *
- * Ответ:
- *   200 OK { ok: true, case_id: "..." }        — заявка создана
- *   200 OK { ok: false, error: "..." }         — заявка отклонена (см. error)
- *   400/429/500 — для нетипичных ошибок
- *
- * Защита:
- *   1. CORS — только для доменов праводом.рф (см. ALLOWED_ORIGINS)
- *   2. Honeypot — поле website должно быть пустым
- *   3. Cloudflare Turnstile — токен проверяется через siteverify
- *   4. Rate limit — 3 заявки/час с одного IP (через Cloudflare KV)
- *   5. Валидация полей — имя, телефон, service_type обязательны
- *   6. Service role key Supabase хранится в Worker Secret, не в коде
- *
- * Переменные окружения (создаются в Cloudflare → Worker → Settings → Variables):
- *   - SUPABASE_URL                  — URL проекта Supabase (см. код CRM)
- *   - SUPABASE_SERVICE_ROLE_KEY     — service role key (sb_service_role_...)
- *   - TURNSTILE_SECRET_KEY         — секрет Cloudflare Turnstile
- *   - ALLOWED_ORIGINS               — список разрешённых доменов через запятую
- *   - CRM_OWNER_USER_ID             — ID пользователя CRM, к которому привязать заявку
- *                                     (берётся из Supabase auth.users)
- *
- * KV namespace (опционально, для rate limit):
- *   - Создать в Cloudflare → Workers → KV → Namespaces
- *   - Привязать к этому Worker-у как LEAD_KV
- *
- * Деплой:
- *   1. В Cloudflare dashboard → Workers & Pages → Create → Worker
- *   2. Скопировать этот код в редактор
- *   3. В Settings → Variables добавить секреты и переменные (см. выше)
- *   4. (Опционально) Привязать KV namespace
- *   5. Если Worker на поддомене (например, api.праводом.рф) — настроить Route
- *      или просто использовать URL https://[worker-name].[account].workers.dev
- *   6. В main.js на сайте заменить FORM_CONFIG.endpoint на полный URL Worker
- *
- * Альтернатива: Cloudflare Pages Functions
- *   Можно положить этот файл в /functions/api/lead.js в репозитории GitHub Pages
- *   проекта (если аккаунт подключён к Cloudflare Pages). Тогда endpoint будет
- *   /api/lead на основном домене.
+ * Если ORG_FIRST_STAGE_ID или ORG_PIPELINE_ID не заданы — Worker сам найдёт
+ * воронку по entity_type='organization' и её первую стадию с sort_order=0.
  * ============================================================ */
 
 const ALLOWED_ORIGINS = [
-  "https://xn--80aeg6aibci.xn--p1ai",        // punycode праводом.рф
-  "https://праводом.рф",                       // кириллица (браузер обычно шлёт punycode)
-  "https://www.xn--80aeg6aibci.xn--p1ai",      // www версия (на всякий)
-  "http://localhost:8080",                    // локальная разработка
-  "http://127.0.0.1:8080",                    // локальная разработка (IP)
-  "https://paffnyters.github.io",             // GitHub Pages (до подключения домена)
+  "https://xn--80aeg6aibci.xn--p1ai",
+  "https://праводом.рф",
+  "https://www.xn--80aeg6aibci.xn--p1ai",
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+  "https://paffnyters.github.io",
 ];
 
 function getCorsHeaders(origin) {
-  // Если origin есть в разрешённых — возвращаем его, иначе первый из списка
   const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     "Access-Control-Allow-Origin": allowOrigin,
@@ -99,21 +55,22 @@ function errMessage(e) {
   return e instanceof Error ? e.message : String(e);
 }
 
-/**
- * Проверка Cloudflare Turnstile токена.
- * Делает POST на https://challenges.cloudflare.com/turnstile/v0/siteverify
- */
+function sbHeaders(sbKey) {
+  return {
+    "apikey": sbKey,
+    "Authorization": `Bearer ${sbKey}`,
+    "Content-Type": "application/json",
+    "Prefer": "return=representation",
+  };
+}
+
 async function verifyTurnstile(token, ip, secret) {
-  // Если секрет не настроен — пропускаем проверку (для dev / первого запуска)
   if (!secret) {
-    console.warn("[lead-worker] TURNSTILE_SECRET_KEY не задан — пропускаем проверку Turnstile");
+    console.warn("[lead-worker] TURNSTILE_SECRET_KEY не задан — пропускаем проверку");
     return { success: true, skipped: true };
   }
-  // Если токен пустой — но секрет задан — это ошибка
-  // НО: если на сайте виджет ещё не настроен (заглушка sitekey), токена не будет
-  // Разрешаем пропуск в этом случае, выводя предупреждение
   if (!token) {
-    console.warn("[lead-worker] turnstileToken пустой — виджет не настроен или не загружен. Принимаем заявку БЕЗ проверки.");
+    console.warn("[lead-worker] turnstileToken пустой — принимаем без проверки");
     return { success: true, skipped: true, reason: "no-token" };
   }
   const form = new FormData();
@@ -124,18 +81,11 @@ async function verifyTurnstile(token, ip, secret) {
     method: "POST",
     body: form,
   });
-  if (!res.ok) {
-    return { success: false, error: `Turnstile HTTP ${res.status}` };
-  }
+  if (!res.ok) return { success: false, error: `Turnstile HTTP ${res.status}` };
   const data = await res.json();
   return { success: !!data.success, error: data["error-codes"]?.join(", ") || null };
 }
 
-/**
- * Rate limit по IP: максимум N заявок в час.
- * Использует Cloudflare KV (если LEAD_KV привязан к Worker).
- * Если KV нет — пропускает (no-op).
- */
 async function checkRateLimit(ip, env) {
   if (!env.LEAD_KV) return { ok: true, reason: "kv-not-bound" };
   const MAX_PER_HOUR = 3;
@@ -143,63 +93,56 @@ async function checkRateLimit(ip, env) {
   const key = `rl:${ip}`;
   const now = Math.floor(Date.now() / 1000);
   const raw = await env.LEAD_KV.get(key, "json");
-  let count = 0;
-  let firstTs = 0;
+  let count = 0, firstTs = 0;
   if (raw && typeof raw === "object") {
     count = raw.count || 0;
     firstTs = raw.firstTs || 0;
   }
-  // Если окно истекло — сбрасываем
   if (firstTs && now - firstTs > WINDOW_SEC) {
     count = 0;
     firstTs = now;
   }
   if (!firstTs) firstTs = now;
   count += 1;
-  if (count > MAX_PER_HOUR) {
-    return { ok: false, reason: "rate-limit", count, firstTs };
-  }
+  if (count > MAX_PER_HOUR) return { ok: false, reason: "rate-limit", count, firstTs };
   await env.LEAD_KV.put(key, JSON.stringify({ count, firstTs }), { expirationTtl: WINDOW_SEC });
   return { ok: true, count, firstTs };
 }
 
 /**
- * Найти воронку «Клиенты» и её первую стадию.
+ * Найти воронку с entity_type='organization' и её первую стадию.
  * Приоритеты:
- *   1) Если задан env.CLIENTS_FIRST_STAGE_ID — используем его напрямую
- *      (нужно ещё узнать pipeline_id по этому stage_id).
- *   2) Иначе если задан env.CLIENTS_PIPELINE_ID — берём его + первую активную стадию.
- *   3) Иначе ищем воронку по имени «Клиенты» (ilike '%Клиент%') + первую стадию.
- *
- * Возвращает { pipeline_id, stage_id }.
+ *   1) Если задан env.ORG_FIRST_STAGE_ID — используем его напрямую
+ *      (Worker сам найдёт pipeline_id по этому stage_id).
+ *   2) Иначе если задан env.ORG_PIPELINE_ID — берём его + первую активную стадию.
+ *   3) Иначе ищем воронку по entity_type='organization' + первую стадию.
  */
-async function findClientsPipeline(env) {
+async function findOrgPipeline(env) {
   const sbUrl = env.SUPABASE_URL;
   const sbKey = env.SUPABASE_SERVICE_ROLE_KEY;
   if (!sbUrl || !sbKey) throw new Error("SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY не заданы");
 
-  // 1. Если задан явный ID стадии — используем его напрямую
-  if (env.CLIENTS_FIRST_STAGE_ID) {
-    // Получим pipeline_id по stage_id
+  // 1. Если задан явный ID стадии — используем его
+  if (env.ORG_FIRST_STAGE_ID) {
     const stageRes = await fetch(
-      `${sbUrl}/rest/v1/crm_pipeline_stages?id=eq.${env.CLIENTS_FIRST_STAGE_ID}&limit=1`,
+      `${sbUrl}/rest/v1/crm_pipeline_stages?id=eq.${env.ORG_FIRST_STAGE_ID}&limit=1`,
       { headers: sbHeaders(sbKey) }
     );
     if (!stageRes.ok) throw new Error(`Stage fetch error ${stageRes.status}`);
     const stages = await stageRes.json();
     if (!stages.length) {
-      // Отладка: показать все стадии, чтобы пользователь мог выбрать правильный ID
-      const allStagesRes = await fetch(
+      // Отладка: показать все стадии
+      const allRes = await fetch(
         `${sbUrl}/rest/v1/crm_pipeline_stages?select=id,name,pipeline_id,sort_order,active&order=sort_order&limit=50`,
         { headers: sbHeaders(sbKey) }
       );
-      let allStages = [];
-      if (allStagesRes.ok) allStages = await allStagesRes.json();
-      const stageList = allStages.map(s => `id=${s.id} | name="${s.name}" | pipeline_id=${s.pipeline_id} | sort=${s.sort_order} | active=${s.active}`).join("\n  ");
+      let all = [];
+      if (allRes.ok) all = await allRes.json();
+      const list = all.map(s => `id=${s.id} | name="${s.name}" | pipeline_id=${s.pipeline_id} | sort=${s.sort_order} | active=${s.active}`).join("\n  ");
       throw new Error(
-        `Стадия с id ${env.CLIENTS_FIRST_STAGE_ID} не найдена в crm_pipeline_stages.\n\n` +
-        `Доступные стадии в таблице:\n  ${stageList || "(пусто)"}\n\n` +
-        `Скопируй правильный id из списка выше и обнови переменную CLIENTS_FIRST_STAGE_ID в Worker.`
+        `Стадия с id ${env.ORG_FIRST_STAGE_ID} не найдена.\n\n` +
+        `Все стадии:\n  ${list || "(пусто)"}\n\n` +
+        `Обнови переменную ORG_FIRST_STAGE_ID в Worker.`
       );
     }
     const stage = stages[0];
@@ -207,65 +150,67 @@ async function findClientsPipeline(env) {
     return { pipeline_id: stage.pipeline_id, stage_id: stage.id };
   }
 
-  // 2. Если задан явный ID воронки — используем его + первую активную стадию
-  if (env.CLIENTS_PIPELINE_ID) {
+  // 2. Если задан явный ID воронки — используем его + первую стадию
+  if (env.ORG_PIPELINE_ID) {
     const stageRes = await fetch(
-      `${sbUrl}/rest/v1/crm_pipeline_stages?pipeline_id=eq.${env.CLIENTS_PIPELINE_ID}&active=eq.true&order=sort_order&limit=1`,
+      `${sbUrl}/rest/v1/crm_pipeline_stages?pipeline_id=eq.${env.ORG_PIPELINE_ID}&active=eq.true&order=sort_order&limit=1`,
       { headers: sbHeaders(sbKey) }
     );
     if (!stageRes.ok) throw new Error(`Stage fetch error ${stageRes.status}`);
     const stages = await stageRes.json();
-    if (!stages.length) throw new Error("В воронке CLIENTS_PIPELINE_ID нет активных стадий");
-    return { pipeline_id: env.CLIENTS_PIPELINE_ID, stage_id: stages[0].id };
+    if (!stages.length) throw new Error("В воронке ORG_PIPELINE_ID нет активных стадий");
+    return { pipeline_id: env.ORG_PIPELINE_ID, stage_id: stages[0].id };
   }
 
-  // 3. Иначе ищем воронку по имени «Клиенты» (case-insensitive, содержит «Клиент»)
+  // 3. Ищем воронку по entity_type='organization' (автоматически)
   const pipeRes = await fetch(
-    `${sbUrl}/rest/v1/crm_pipelines?name=ilike.%25%D0%9A%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%25&active=eq.true&limit=1`,
+    `${sbUrl}/rest/v1/crm_pipelines?entity_type=eq.organization&active=eq.true&order=sort_order&limit=1`,
     { headers: sbHeaders(sbKey) }
   );
   if (!pipeRes.ok) throw new Error(`Pipeline fetch error ${pipeRes.status}: ${await pipeRes.text()}`);
   const pipes = await pipeRes.json();
   if (!pipes.length) {
-    throw new Error("Воронка «Клиенты» не найдена. Создайте её в CRM или задайте CLIENTS_PIPELINE_ID/CLIENTS_FIRST_STAGE_ID.");
+    // Отладка: показать все воронки
+    const allRes = await fetch(
+      `${sbUrl}/rest/v1/crm_pipelines?select=id,name,entity_type,active&order=sort_order&limit=50`,
+      { headers: sbHeaders(sbKey) }
+    );
+    let all = [];
+    if (allRes.ok) all = await allRes.json();
+    const list = all.map(p => `id=${p.id} | name="${p.name}" | entity_type=${p.entity_type} | active=${p.active}`).join("\n  ");
+    throw new Error(
+      `Воронка с entity_type='organization' не найдена.\n\n` +
+      `Все воронки:\n  ${list || "(пусто)"}\n\n` +
+      `Создай воронку организации в CRM (раздел «Клиенты») или задай ORG_PIPELINE_ID.`
+    );
   }
   const pipeline = pipes[0];
 
-  // 4. Найти первую стадию этой воронки
+  // 4. Берём первую стадию этой воронки
   const stageRes = await fetch(
     `${sbUrl}/rest/v1/crm_pipeline_stages?pipeline_id=eq.${pipeline.id}&active=eq.true&order=sort_order&limit=1`,
     { headers: sbHeaders(sbKey) }
   );
   if (!stageRes.ok) throw new Error(`Stage fetch error ${stageRes.status}`);
   const stages = await stageRes.json();
-  if (!stages.length) throw new Error(`В воронке «${pipeline.name}» нет активных стадий. Создайте хотя бы одну.`);
+  if (!stages.length) throw new Error(`В воронке «${pipeline.name}» нет активных стадий`);
   return { pipeline_id: pipeline.id, stage_id: stages[0].id };
 }
 
-function sbHeaders(sbKey) {
-  return {
-    "apikey": sbKey,
-    "Authorization": `Bearer ${sbKey}`,
-    "Content-Type": "application/json",
-    "Prefer": "return=representation",
-  };
-}
-
 /**
- * Создать запись в crm_cases.
+ * Создать запись в crm_organizations (НЕ crm_cases!).
+ * Это раздел «Клиенты» в CRM.
  */
-async function createCase(env, payload, pipeline, ip) {
+async function createOrg(env, payload, pipeline, ip) {
   const sbUrl = env.SUPABASE_URL;
   const sbKey = env.SUPABASE_SERVICE_ROLE_KEY;
 
   // Source на сайте: site_main, site_zalyv, site_dtp, site_zhilishchnye_spory,
-  // site_dolgi, site_privacy. CRM разрешает только: mailing, dmitry_base, not_set.
-  // Конвертируем: заявка с сайта → 'not_set' (для CRM),
-  // а полную метку источника сохраняем в notes для контекста.
+  // site_dolgi, site_privacy. CRM разрешает: mailing, dmitry_base, not_set.
   const sourcePage = payload.source || payload.sourcePage || "site_unknown";
-  const crmSource = "not_set";   // разрешённое значение CHECK constraint
+  const crmSource = "not_set";   // проходит CHECK constraint
 
-  // Собираем заметку: метка источника + комментарий клиента + URL + IP + время + service_type
+  // Метка вида услуги для заметки
   const serviceLabels = {
     'dolgi': 'Взыскание задолженности (для УК)',
     'zalyv': 'Залив квартиры',
@@ -275,6 +220,7 @@ async function createCase(env, payload, pipeline, ip) {
   };
   const serviceLabel = serviceLabels[payload.service_type] || payload.service_type || '—';
 
+  // Собираем notes: источник + вид услуги + комментарий + URL + IP + время
   const notesParts = [
     `Источник: ${sourcePage}`,
     `Вид услуги: ${serviceLabel}`,
@@ -282,25 +228,28 @@ async function createCase(env, payload, pipeline, ip) {
     `Страница: ${payload.pageUrl || "—"}`,
     `IP: ${ip || "—"}`,
     `Время: ${payload.submittedAt || new Date().toISOString()}`,
-    payload.email ? `Email: ${payload.email}` : "",
   ].filter(Boolean);
   const notes = notesParts.join("\n");
 
-  // title для карточки в CRM
-  const title = payload.caseTitle || `${payload.name} — заявка с сайта`;
+  // Название организации — из имени клиента + вид услуги
+  const orgName = `${payload.name} — ${serviceLabel}`;
 
   const body = {
-    title,
-    legal_pipeline_id: pipeline.pipeline_id,
-    legal_stage_id: pipeline.stage_id,
-    organization_id: null,        // новая заявка без организации
-    source: crmSource,            // 'not_set' — проходит CHECK constraint
+    name: orgName,                              // название карточки в CRM
+    contact_name: payload.name || null,         // контактное лицо
+    phone: payload.phone || null,
+    email: payload.email || null,
+    inn: null,                                  // ИНН — клиент не заполняет на сайте
     notes,
+    source: crmSource,                           // 'not_set' — проходит CHECK constraint
     owner_id: env.CRM_OWNER_USER_ID || null,
-    // Если в таблице есть эти поля — запишем. Если нет — Supabase проигнорирует
+    sales_pipeline_id: pipeline.pipeline_id,   // воронка организации (НЕ legal_pipeline_id!)
+    sales_stage_id: pipeline.stage_id,          // первая стадия (НЕ legal_stage_id!)
+    service_cost: null,                          // стоимость не указана
+    service_cost_unknown: true,                 // покажет «?» в карточке
   };
 
-  const res = await fetch(`${sbUrl}/rest/v1/crm_cases`, {
+  const res = await fetch(`${sbUrl}/rest/v1/crm_organizations`, {
     method: "POST",
     headers: sbHeaders(sbKey),
     body: JSON.stringify(body),
@@ -323,7 +272,7 @@ export default {
                request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
                "";
 
-    // CORS preflight — обязательный для cross-origin POST с Content-Type: application/json
+    // CORS preflight
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: getCorsHeaders(origin) });
     }
@@ -335,13 +284,13 @@ export default {
     try {
       const payload = await request.json();
 
-      // 1. Honeypot: если поле website заполнено — это бот, молча «принимаем»
+      // 1. Honeypot
       if (payload.website && String(payload.website).trim() !== "") {
         console.warn("[lead-worker] Honeypot заполнен — заявка отклонена");
         return json({ ok: true, case_id: null, silent_drop: true }, 200, origin);
       }
 
-      // 2. Валидация обязательных полей
+      // 2. Валидация
       if (!payload.name || String(payload.name).trim().length < 2) {
         return json({ ok: false, error: "Укажите имя (минимум 2 символа)" }, 200, origin);
       }
@@ -356,7 +305,7 @@ export default {
         return json({ ok: false, error: "Нет согласия на обработку персональных данных" }, 200, origin);
       }
 
-      // 3. Проверка Turnstile
+      // 3. Turnstile
       const tsResult = await verifyTurnstile(payload.turnstileToken, ip, env.TURNSTILE_SECRET_KEY);
       if (!tsResult.success) {
         return json({ ok: false, error: `Проверка Turnstile не пройдена: ${tsResult.error || ""}` }, 200, origin);
@@ -368,13 +317,13 @@ export default {
         return json({ ok: false, error: "Слишком много заявок. Попробуйте позже." }, 200, origin);
       }
 
-      // 5. Найти воронку «Клиенты» и первую стадию
-      const pipeline = await findClientsPipeline(env);
+      // 5. Найти воронку организации и первую стадию
+      const pipeline = await findOrgPipeline(env);
 
-      // 6. Создать case в Supabase
-      const newCase = await createCase(env, payload, pipeline, ip);
+      // 6. Создать запись в crm_organizations
+      const newOrg = await createOrg(env, payload, pipeline, ip);
 
-      return json({ ok: true, case_id: newCase.id || null }, 200, origin);
+      return json({ ok: true, org_id: newOrg.id || null }, 200, origin);
 
     } catch (e) {
       console.error("[lead-worker] Error:", e);
