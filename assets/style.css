@@ -60,6 +60,11 @@ html{scrollbar-width:thin;scrollbar-color:rgba(62,143,206,.5) rgba(62,143,206,.0
   border:2px solid transparent;
 }
 ::-webkit-scrollbar-corner{background:transparent}
+
+/* Гарантия что [hidden] атрибут всегда скрывает элемент, даже если
+   в CSS задан display: flex/block/etc. Без этого браузер может
+   продолжать показывать элемент (например, калькулятор скидки). */
+[hidden]{display:none !important}
 img{max-width:100%;display:block}
 a{color:var(--cta-deep);text-decoration:none}
 a:hover{color:var(--cta-strong)}
