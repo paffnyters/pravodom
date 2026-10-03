@@ -124,6 +124,85 @@
   })();
 
   /* ------------------------------------------------------------
+   * 2.3. КАЛЬкулятор стоимости судебных приказов (на /dolgi/)
+   * ---------------------------------------------------------- */
+  (function initCalc() {
+    var calcEl = document.getElementById('dolgi-calc');
+    if (!calcEl) return;
+
+    var input = document.getElementById('calc-count');
+    var minusBtn = document.getElementById('calc-minus');
+    var plusBtn = document.getElementById('calc-plus');
+    var totalEl = document.getElementById('calc-total');
+    var perUnitEl = document.getElementById('calc-per-unit');
+    var discountBlock = document.getElementById('calc-discount-block');
+    var discountPercentEl = document.getElementById('calc-discount-percent');
+    var savedEl = document.getElementById('calc-saved');
+
+    // Ценовые пороги
+    var BASE_PRICE = 2000;
+    var TIERS = [
+      { min: 100, price: 1000 },  // от 100 → 1000 ₽
+      { min: 10,  price: 1500 },  // от 10  → 1500 ₽
+      { min: 1,   price: 2000 },  // базовая цена
+    ];
+
+    function fmtMoney(n) {
+      return new Intl.NumberFormat('ru-RU').format(Math.round(n)) + ' ₽';
+    }
+
+    function getTierPrice(count) {
+      for (var i = 0; i < TIERS.length; i++) {
+        if (count >= TIERS[i].min) return TIERS[i].price;
+      }
+      return BASE_PRICE;
+    }
+
+    function calc() {
+      var count = parseInt(input.value, 10);
+      if (isNaN(count) || count < 1) count = 1;
+      if (count > 9999) count = 9999;
+      input.value = count;
+
+      var price = getTierPrice(count);
+      var total = price * count;
+      var baseTotal = BASE_PRICE * count;
+      var saved = baseTotal - total;
+      var discountPercent = Math.round((1 - total / baseTotal) * 100);
+
+      totalEl.textContent = fmtMoney(total);
+      perUnitEl.textContent = fmtMoney(price);
+
+      if (saved > 0) {
+        discountBlock.hidden = false;
+        discountPercentEl.textContent = discountPercent + '%';
+        savedEl.textContent = fmtMoney(saved);
+      } else {
+        discountBlock.hidden = true;
+      }
+    }
+
+    // Привязка событий
+    input.addEventListener('input', calc);
+    input.addEventListener('change', calc);
+    minusBtn.addEventListener('click', function () {
+      var v = parseInt(input.value, 10);
+      if (isNaN(v)) v = 1;
+      if (v > 1) input.value = v - 1;
+      calc();
+    });
+    plusBtn.addEventListener('click', function () {
+      var v = parseInt(input.value, 10);
+      if (isNaN(v)) v = 0;
+      input.value = v + 1;
+      calc();
+    });
+
+    // Начальный расчёт
+    calc();
+  })();
+
+  /* ------------------------------------------------------------
    * 3. МОДАЛЬНОЕ ОКНО ЗАЯВКИ
    * ---------------------------------------------------------- */
   var modal = document.getElementById('zayavka');

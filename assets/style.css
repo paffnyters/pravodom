@@ -567,6 +567,185 @@ body.nav-open{overflow:hidden}
   transform:rotate(-45deg);
 }
 .price-card .btn{margin-top:auto;width:100%}
+
+/* Блок скидок внутри карточки цены */
+.price-card__discounts{
+  margin:14px 0 16px;
+  padding:12px 14px;
+  background:rgba(62,143,206,.08);
+  border:1px dashed rgba(62,143,206,.32);
+  border-radius:10px;
+}
+.price-card__discounts-title{
+  font-size:.74rem;
+  font-weight:700;
+  color:var(--cta-deep);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.price-card__discount{
+  display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  font-size:.88rem;color:var(--navy-700);
+  padding:4px 0;
+}
+.price-card__discount b{
+  color:var(--navy-900);
+  font-weight:800;
+  font-size:.95rem;
+  white-space:nowrap;
+}
+
+/* -------- Калькулятор стоимости судебных приказов -------- */
+.calc{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:32px;
+  align-items:stretch;
+  margin-top:48px;
+  background:linear-gradient(135deg,#082D45 0%,#0C3E60 100%);
+  color:#fff;
+  border-radius:var(--radius-lg);
+  padding:32px 36px;
+  border:1px solid rgba(62,143,206,.25);
+  box-shadow:0 14px 40px rgba(8,45,69,.18);
+  position:relative;
+  overflow:hidden;
+}
+.calc::before{
+  content:"";position:absolute;top:-40%;right:-5%;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(62,143,206,.32) 0%,transparent 60%);
+  pointer-events:none;
+}
+.calc__left{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px}
+.calc__eyebrow{
+  font-size:.74rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:#7FB8DF;margin-bottom:2px;
+}
+.calc__eyebrow::before{content:"";display:inline-block;width:24px;height:2px;background:var(--cta);border-radius:2px;vertical-align:middle;margin-right:10px;margin-bottom:3px}
+.calc__title{
+  margin:0 0 8px;
+  font-size:clamp(1.15rem,1.8vw,1.45rem);
+  font-weight:800;
+  color:#fff;
+  letter-spacing:-0.01em;
+  line-height:1.25;
+}
+.calc__text{
+  margin:0 0 18px;
+  font-size:.92rem;
+  color:rgba(255,255,255,.78);
+  line-height:1.55;
+  max-width:420px;
+}
+.calc__input-wrap{
+  display:flex;
+  align-items:stretch;
+  gap:8px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.18);
+  border-radius:14px;
+  padding:6px;
+  max-width:280px;
+}
+.calc__btn{
+  width:42px;height:42px;
+  border:none;
+  background:rgba(62,143,206,.18);
+  color:#fff;
+  border-radius:10px;
+  font-size:1.4rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .2s,transform .15s;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.calc__btn:hover{background:rgba(62,143,206,.4);transform:scale(1.04)}
+.calc__btn:active{transform:scale(.96)}
+.calc__input{
+  flex:1;
+  width:100%;
+  background:transparent;
+  border:none;
+  color:#fff;
+  font-size:1.5rem;
+  font-weight:700;
+  text-align:center;
+  outline:none;
+  -moz-appearance:textfield;
+  min-width:0;
+}
+.calc__input::-webkit-outer-spin-button,
+.calc__input::-webkit-inner-spin-button{
+  -webkit-appearance:none;margin:0;
+}
+.calc__hint{
+  font-size:.78rem;
+  color:rgba(255,255,255,.55);
+  margin-top:8px;
+}
+
+/* Правая часть — результат */
+.calc__right{
+  position:relative;z-index:1;
+  display:flex;flex-direction:column;
+  gap:6px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:20px 22px;
+}
+.calc__result-label{
+  font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:#7FB8DF;
+  margin-bottom:4px;
+}
+.calc__result-value{
+  font-size:clamp(2rem,3.5vw,2.8rem);
+  font-weight:800;
+  color:#fff;
+  line-height:1;
+  letter-spacing:-0.02em;
+  margin-bottom:6px;
+}
+.calc__per-unit{
+  font-size:.85rem;
+  color:rgba(255,255,255,.7);
+}
+.calc__per-unit b{color:#CFE4F3;font-weight:700}
+.calc__discount{
+  display:flex;align-items:center;gap:10px;
+  margin-top:10px;
+  padding:8px 12px;
+  background:rgba(223,242,231,.12);
+  border:1px solid rgba(223,242,231,.25);
+  border-radius:10px;
+  font-size:.85rem;
+}
+.calc__discount-label{color:rgba(255,255,255,.65)}
+.calc__discount-value{
+  font-weight:800;color:#9CD9AE;font-size:1.05rem;
+  padding:2px 8px;
+  background:rgba(223,242,231,.18);
+  border-radius:6px;
+}
+.calc__discount-saved{
+  margin-left:auto;
+  color:rgba(255,255,255,.78);
+}
+.calc__discount-saved b{color:#9CD9AE;font-weight:700}
+.calc__cta{
+  margin-top:14px;
+  align-self:flex-start;
+}
+
+@media (max-width:760px){
+  .calc{grid-template-columns:1fr;padding:24px 20px;gap:22px}
+  .calc__right{order:-1}
+  .calc__input-wrap{max-width:100%}
+  .calc__cta{align-self:stretch}
+}
 .price-foot{
   background:var(--bg-blue);
   border-radius:var(--radius-md);
